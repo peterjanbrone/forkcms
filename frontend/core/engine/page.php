@@ -71,6 +71,13 @@ class FrontendPage extends FrontendBaseObject
 	 */
 	protected $statusCode = 200;
 
+	/**
+	 * Constructor method which takes a pageId, if set it's possible
+	 * to render the 404 page without losing the uri, if not set we'll 
+	 * retrieve the pageId from the URL
+	 * 
+	 * @param int $pageId
+	 */
 	public function __construct($pageId = null)
 	{
 		parent::__construct();

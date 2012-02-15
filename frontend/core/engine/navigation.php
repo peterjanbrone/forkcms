@@ -550,7 +550,6 @@ class FrontendNavigation extends FrontendBaseObject
 		return self::getURL(404, $language);
 	}
 
-
 	/**
 	 * This function lets you add ignored pages
 	 *
