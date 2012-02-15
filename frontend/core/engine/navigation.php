@@ -51,13 +51,8 @@ class FrontendNavigation extends FrontendBaseObject
 	 */
 	public static function dieWith404()
 	{
-		// init new 404 page
 		$page = new FrontendPage(404);
-
-		// display the page
 		$page->display();
-
-		// prevent further execution
 		exit;
 	}
 
