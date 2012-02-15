@@ -44,7 +44,7 @@ class FrontendFaqCategory extends FrontendBaseBlock
 	private function getData()
 	{
 		// validate incoming parameters
-		if($this->URL->getParameter(1) === null) $this->redirect(FrontendNavigation::getURL(404));
+		if($this->URL->getParameter(1) === null) FrontendNavigation::dieWith404();
 
 		// get by URL
 		$this->record = FrontendFaqModel::getCategory($this->URL->getParameter(1));
