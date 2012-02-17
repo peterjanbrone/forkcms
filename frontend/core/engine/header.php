@@ -594,7 +594,8 @@ class FrontendHeader extends FrontendBaseObject
 			// build GA-tracking code
 			$trackingCode = '<script type="text/javascript">
 								var _gaq = [[\'_setAccount\', \'' . $webPropertyId . '\'],
-											[\'_setDomainName\', \'none\'],
+											[\'_setDomainName\', \'localhost.local\'],
+											[\'_setAllowLinker\', true],
 											[\'_trackPageview\'],
 											[\'_trackPageLoadTime\']];
 
