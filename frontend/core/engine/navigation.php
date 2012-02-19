@@ -72,7 +72,6 @@ class FrontendNavigation extends FrontendBaseObject
 
 		// go on and die
 		$page = new FrontendPage(404);
-		$page->display();
 		exit;
 	}
 
