@@ -118,7 +118,9 @@ class FrontendPage extends FrontendBaseObject
 		$this->storeStatistics();
 
 		// display
-		$this->display();
+		($this->pageId == 404)
+			? $this->display(404)
+			: $this->display();
 
 		// trigger event
 		FrontendModel::triggerEvent(
@@ -142,10 +144,10 @@ class FrontendPage extends FrontendBaseObject
 	/**
 	 * Display the page
 	 */
-	public function display()
+	public function display($pageId = null)
 	{
 		// parse header
-		$this->header->parse();
+		$this->header->parse($pageId);
 
 		// parse breadcrumb
 		$this->breadcrumb->parse();
