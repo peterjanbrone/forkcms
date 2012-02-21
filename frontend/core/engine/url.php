@@ -248,6 +248,58 @@ class FrontendURL
 			// language set in the cookie
 			elseif(SpoonCookie::exists('frontend_language') && in_array(SpoonCookie::get('frontend_language'), $redirectLanguages))
 			{
+				// list of pageIds & their full URL
+				$keys = FrontendNavigation::getKeys();
+
+				// full URL
+				$URL = implode('/', $chunks);
+				$startURL = $URL;
+
+				// loop until we find the URL in the list of pages
+				while(!in_array($URL, $keys))
+				{
+					// remove the last chunk
+					array_pop($chunks);
+
+					// redefine the URL
+					$URL = implode('/', $chunks);
+				}
+
+				// if it's the homepage AND parameters were given (not allowed!)
+				if($URL == '' && $queryString != '') FrontendNavigation::dieWith404();
+
+				// explode in pages
+				if($URL != '')
+				{
+					$pages = explode('/', $URL);
+
+					// reset pages
+					$this->setPages($pages);
+				}
+
+				// set parameters
+				$parameters = trim(substr($startURL, strlen($URL)), '/');
+
+				// has at least one parameter
+				if($parameters != '')
+				{
+					// parameters will be separated by /
+					$parameters = explode('/', $parameters);
+
+					// set parameters
+					$this->setParameters($parameters);
+				}
+
+				// pageId, parentId & depth
+				$pageId = FrontendNavigation::getPageId(implode('/', $this->getPages()));
+				$pageInfo = FrontendNavigation::getPageInfo($pageId);
+
+				// invalid page, or parameters but no extra
+				if($pageInfo === false || (!empty($parameters) && !$pageInfo['has_extra']))
+				{
+					FrontendNavigation::dieWith404();
+				}
+
 				// set languageId
 				$language = (string) SpoonCookie::get('frontend_language');
 

@@ -584,6 +584,9 @@ class FrontendBaseBlock
 	 */
 	public function redirect($URL, $code = 302)
 	{
+		// die instantly if URL equals 404 URL
+		if($URL === FrontendNavigation::getURL(404)) FrontendNavigation::dieWith404();
+
 		SpoonHTTP::redirect((string) $URL, (int) $code);
 	}
 
