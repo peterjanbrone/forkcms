@@ -594,9 +594,12 @@ class FrontendHeader extends FrontendBaseObject
 			// build special GA-tracking code for 404 pages
 			$special404Code = ($pageId === 404)
 				? 'try{
+					_gaq.push([\'_trackEvent\', \'404\', encodeURIComponent(document.location.pathname)
+					+ encodeURIComponent(document.location.search), encodeURIComponent(document.referrer)]);
+
 					var pageTracker = _gat._getTracker(' . $webPropertyId . ');
-					pageTracker._trackPageview("/404?page=" + document.location.pathname
-					+ document.location.search + "&from=" + document.referrer);
+					pageTracker._trackPageview(\'/404?page=\' + encodeURIComponent(document.location.pathname)
+					+ encodeURIComponent(document.location.search) + \'&from=\' + encodeURIComponent(document.referrer));
 					} catch(err) {}'
 				: '';
 
@@ -616,7 +619,6 @@ class FrontendHeader extends FrontendBaseObject
 									var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
 								})();
 							</script>';
-
 
 			// add to the header
 			$siteHTMLHeader .= "\n" . $trackingCode;
