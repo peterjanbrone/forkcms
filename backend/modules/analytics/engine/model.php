@@ -360,6 +360,34 @@ class BackendAnalyticsModel
 	}
 
 	/**
+	 * Get the 404 page statistics
+	 *
+	 */
+	public static function getErrorPageStatistics()
+	{
+		// prepare
+		$results = array();
+		$db = BackendModel::getDB();
+
+		// get the page statistics from the db
+		$results['pageStats'] = (array) $db->getRecords(
+				'SELECT id, page, referrer, extension, date
+				FROM analytics_error_page_statistics
+				ORDER BY date DESC'
+		);
+
+		// get the visitor info from the db
+		$results['visitorInfo'] = (array) $db->getRecords(
+				'SELECT id, page, extension, remote_ip, browser, caller_is_module, is_logged_in, date
+				FROM analytics_error_page_statistics
+				ORDER BY date DESC'
+		);
+
+		return $results;
+	}
+
+
+	/**
 	 * Get the exit pages
 	 *
 	 * @param int $startTimestamp The start timestamp for the cache file.

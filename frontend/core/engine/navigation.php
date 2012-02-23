@@ -51,26 +51,6 @@ class FrontendNavigation extends FrontendBaseObject
 	 */
 	public static function dieWith404()
 	{
-		// get the backtrace
-		$trace = debug_backtrace();
-		array_shift($trace); // remove first one ( dieWith404 )
-
-		// find out if the call was made from a module
-		$caller = $trace[0]['object'];
-		$callerIsModule = ($caller->getModule() !== null && $caller->getModule() !== '')? true : false;
-
-		// get the browser and remote ip
-		$browser = $_SERVER['HTTP_USER_AGENT'];
-		$remoteIp = $_SERVER['REMOTE_ADDR'];
-
-		// get the extension
-		$queryStringChunks = explode(".", Spoon::get('url')->getQueryString());
-		$extension = (count($queryStringChunks) > 1)? end($queryStringChunks) : null;
-
-		// find out if the user was logged in or not
-		$loggedInFront = FrontendProfilesAuthentication::isLoggedIn();
-
-		// go on and die
 		$page = new FrontendPage(404);
 		exit;
 	}

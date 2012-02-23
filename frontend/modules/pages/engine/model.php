@@ -84,6 +84,15 @@ class FrontendPagesModel implements FrontendTagsInterface
 		// return
 		return $items;
 	}
+	/**
+	 * Saves all 404 error page statistics
+	 *
+	 * @param array $stats
+	 */
+	 public static function insertErrorPageStatistics($item)
+	 {
+		return (int) FrontendModel::getDB(true)->insert('analytics_error_page_statistics', $item);
+	 }
 
 	/**
 	 * Parse the search results for this module

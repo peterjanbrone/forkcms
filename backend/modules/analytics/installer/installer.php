@@ -33,9 +33,17 @@ class AnalyticsInstaller extends ModuleInstaller
 			'present' => true
 		);
 
+		$errorStats = array(
+			'column' => 'middle',
+			'position' => 3,
+			'hidden' => false,
+			'present' => true
+		);
+
 		// insert widgets
 		$this->insertDashboardWidget('analytics', 'traffic_sources', $trafficSources);
 		$this->insertDashboardWidget('analytics', 'visitors', $visitors);
+		$this->insertDashboardWidget('analytics', '404_statistics', $errorStats);
 	}
 
 	/**
@@ -72,6 +80,7 @@ class AnalyticsInstaller extends ModuleInstaller
 		$this->setActionRights(1, 'analytics', 'settings');
 		$this->setActionRights(1, 'analytics', 'traffic_sources');
 		$this->setActionRights(1, 'analytics', 'visitors');
+		$this->setActionRights(1, 'analytics', '404_statistics');
 
 		// set navigation
 		$navigationMarketingId = $this->setNavigation(null, 'Marketing', 'analytics/index', null, 4);

@@ -50,7 +50,7 @@ class FrontendFaqCategory extends FrontendBaseBlock
 		$this->record = FrontendFaqModel::getCategory($this->URL->getParameter(1));
 
 		// anything found?
-		if(empty($this->record)) $this->redirect(FrontendNavigation::getURL(404));
+		if(empty($this->record)) FrontendNavigation::dieWith404();
 
 		$this->record['full_url'] = FrontendNavigation::getURLForBlock('faq', 'category') . '/' . $this->record['url'];
 		$this->questions = FrontendFaqModel::getAllForCategory($this->record['id']);
