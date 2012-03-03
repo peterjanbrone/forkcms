@@ -11,6 +11,7 @@ jsBackend.analytics =
 		// variables
 		$chartPieChart = $('#chartPieChart');
 		$chartWidget = $('#chartWidget');
+		$pageNotFoundStatsWidget = $('#pageNotFoundStatsWidget');
 		$chartDoubleMetricPerDay = $('#chartDoubleMetricPerDay');
 		$chartSingleMetricPerDay = $('#chartSingleMetricPerDay');
 
@@ -19,6 +20,7 @@ jsBackend.analytics =
 		jsBackend.analytics.chartPieChart.init();
 		jsBackend.analytics.chartSingleMetricPerDay.init();
 		jsBackend.analytics.chartWidget.init();
+		jsBackend.analytics.pageNotFoundStatsWidget.init();
 		jsBackend.analytics.loading.init();
 		jsBackend.analytics.resize.init();
 	}
@@ -310,6 +312,158 @@ jsBackend.analytics.chartWidget =
 	}
 }
 
+jsBackend.analytics.pageNotFoundStatsWidget =
+{
+	chart: '',
+
+	init: function()
+	{
+		if($pageNotFoundStatsWidget.length > 0) { jsBackend.analytics.pageNotFoundStatsWidget.create(); }
+
+		// refresh the datagrid when clicking on the chartnodes
+		$('#pageNotFoundStatsWidget .highcharts-tracker').click(function() {
+			// extract the date from the tooltip
+			var tooltipText = $('#pageNotFoundStatsWidget .highcharts-tooltip').text();
+			var dateString = tooltipText.replace('Pageviews', '').split(':')[0];
+			
+			// return if we don't have a dite
+			if(!(dateString.length > 0)) return;
+			
+			// append the year and get the unix timestamp
+			var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
+			date = new Date(dateString + ' ' + year);
+			var timestamp = Math.round(date.getTime() / 1000);
+
+			// collapse the datagrid
+			$('#tabs').slideUp('slow', function() {});
+			
+			// get data
+			var page = jsBackend.analytics.loading.page;
+			var identifier = jsBackend.analytics.loading.identifier;
+			$longLoader = $('#longLoader');
+			$statusError = $('#statusError');
+			$loading = $('#loading');
+			
+			// make the datagrid refresh call
+			$.ajax(
+			{
+				timeout: 5000,
+				data:
+				{
+					fork: { action: 'reload_datagrid' },
+					page: page,
+					identifier: identifier
+				},
+				success: function(data, textStatus)
+				{
+					// redirect
+					if(data.data.status == 'unauthorized') { window.location = $('#settingsUrl').html(); }
+
+					if(data.code == 200)
+					{
+						// get redirect url
+						var url = document.location.protocol +'//'+ document.location.host;
+						url += $('#redirect').html();
+						if($('#redirectGet').html() != '') url += '&' + $('#redirectGet').html();
+
+						// redirect
+						if(data.data.status == 'done') window.location = url;
+					}
+					else
+					{
+						// clear interval
+						clearInterval(jsBackend.analytics.loading.interval);
+
+						// loading bar stuff
+						$longLoader.show();
+
+						// show box
+						$statusError.show();
+						$loading.hide();
+
+						// show message
+						jsBackend.messages.add('error', textStatus);
+
+						// alert the user
+						if(jsBackend.debug) alert(textStatus);
+					}
+
+					// alert the user
+					if(data.code != 200 && jsBackend.debug) { alert(data.message); }
+				},
+				error: function(XMLHttpRequest, textStatus, errorThrown)
+				{
+					// clear interval
+					clearInterval(jsBackend.analytics.loading.interval);
+
+					// show box and hide loading bar
+					$statusError.show();
+					$loading.hide();
+					$longLoader.hide();
+
+					// show message
+					jsBackend.messages.add('error', textStatus);
+
+					// alert the user
+					if(jsBackend.debug) alert(textStatus);
+				}
+			});
+
+			// expand the datagrid
+			$('#tabs').slideDown('slow', function() {});
+	    });
+	},
+
+	// add new chart
+	create: function()
+	{
+		var xAxisItems = $('#dataPageNotFoundStatsWidget ul.series li.serie:first-child ul.data li');
+		var xAxisValues = [];
+		var xAxisCategories = [];
+		var counter = 0;
+		var interval = Math.ceil(xAxisItems.length / 10);
+
+		xAxisItems.each(function()
+		{
+			xAxisValues.push($(this).children('span.fulldate').html());
+			var text = $(this).children('span.date').html();
+			if(xAxisItems.length > 10 && counter%interval > 0) text = ' ';
+			xAxisCategories.push(text);
+			counter++;
+		});
+
+		var metric1Name = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.name').html();
+		var metric1Values = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.value');
+		var metric1Data = [];
+
+		metric1Values.each(function() { metric1Data.push(parseInt($(this).html())); });
+
+		jsBackend.analytics.pageNotFoundStatsWidget.chart = new Highcharts.Chart(
+		{
+			chart: { renderTo: 'pageNotFoundStatsWidget', defaultSeriesType: 'line', margin: [30, 0, 30, 0], height: 200, width: 270, defaultSeriesType: 'line' },
+			xAxis: { categories: xAxisCategories },
+			yAxis: { min: 0, max: $('#dataPageNotFoundStatsWidget #maxYAxis').html(), tickInterval: ($('#dataPageNotFoundStatsWidget #tickInterval').html() == '' ? null : $('#dataPageNotFoundStatsWidget #tickInterval').html()), title: { enabled : false } },
+			credits: { enabled: false },
+			legend: { layout: 'horizontal', backgroundColor: 'transparent' },
+			tooltip: { formatter: function() { return '<b>'+ this.series.name +'</b><br/>'+ xAxisValues[this.point.x	] +': '+ this.y; } },
+			plotOptions:
+			{
+				line: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 5, lineWidth: 1 } } } },
+				area: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 5, lineWidth: 1 } } } },
+				column: { pointPadding: 0.2, borderWidth: 0 },
+				series: { fillOpacity: 0.2 }
+			},
+			series: [ { name: metric1Name, data: metric1Data, type: 'area' }]
+		});
+	},
+
+	// destroy chart
+	destroy: function()
+	{
+		jsBackend.analytics.pageNotFoundStatsWidget.chart.destroy();
+	}
+}
+
 jsBackend.analytics.loading =
 {
 	page: 'index',
@@ -461,6 +615,11 @@ jsBackend.analytics.resize =
 			{
 				$chartWidget.html('&nbsp;');
 				jsBackend.analytics.chartWidget.create();
+			}
+			if($pageNotFoundStatsWidget.length > 0)
+			{
+				$pageNotFoundStatsWidget.html('&nbsp;');
+				jsBackend.analytics.pageNotFoundStatsWidget.create();
 			}
 		}
 	}

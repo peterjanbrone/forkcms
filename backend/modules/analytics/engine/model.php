@@ -279,6 +279,51 @@ class BackendAnalyticsModel
 	}
 
 	/**
+	 * Function which retrieves all 404 page data
+	 *
+	 */
+	public static function getDashboardPageNotFoundData($startTimestamp, $endTimestamp)
+	{
+		// we need stats for 9 days so first build that empty array
+		$results = array();
+		$counter = (int) 0;
+
+		// make an array with all the dates and no content
+		while($counter < 9)
+		{
+			$results[$counter] = array();
+			$results[$counter]['timestamp'] = (string) ($startTimestamp + ($counter * 86400));
+			$results[$counter]['pageviews'] = '0';
+			$counter++;
+		}
+
+		// now get the data
+		$db = BackendModel::getDB();
+		$data = array();
+
+		// get the error page statistics
+		$data = (array) $db->getRecords(
+				'SELECT UNIX_TIMESTAMP(i.date) AS timestamp, COUNT(i.id) AS pageviews
+				FROM `analytics_error_pages` AS i
+				WHERE UNIX_TIMESTAMP(i.date) BETWEEN ' . $startTimestamp . ' AND ' . $endTimestamp . '
+				GROUP BY DAY(i.date)
+				ORDER BY i.date ASC'
+		);
+
+		for($i = 0; $i < count($results); $i++)
+		{
+			foreach($data as $dataItem)
+			{
+				if(((int)$dataItem['timestamp'] > (int)$results[$i]['timestamp']) &&
+					((int)$dataItem['timestamp'] < (int)$results[++$i]['timestamp']))
+						$results[$i]['pageviews'] = (string)$dataItem['pageviews'];
+			}
+		}
+
+		return $results;
+	}
+
+	/**
 	 * Get the top exit pages
 	 *
 	 * @param string $page The page.
@@ -358,34 +403,6 @@ class BackendAnalyticsModel
 
 		return (isset(self::$data[$type]['entries']) ? self::$data[$type]['entries'] : self::$data[$type]);
 	}
-
-	/**
-	 * Get the 404 page statistics
-	 *
-	 */
-	public static function getErrorPageStatistics()
-	{
-		// prepare
-		$results = array();
-		$db = BackendModel::getDB();
-
-		// get the page statistics from the db
-		$results['pageStats'] = (array) $db->getRecords(
-				'SELECT id, page, referrer, extension, date
-				FROM analytics_error_page_statistics
-				ORDER BY date DESC'
-		);
-
-		// get the visitor info from the db
-		$results['visitorInfo'] = (array) $db->getRecords(
-				'SELECT id, page, extension, remote_ip, browser, caller_is_module, is_logged_in, date
-				FROM analytics_error_page_statistics
-				ORDER BY date DESC'
-		);
-
-		return $results;
-	}
-
 
 	/**
 	 * Get the exit pages

@@ -33,7 +33,7 @@ class AnalyticsInstaller extends ModuleInstaller
 			'present' => true
 		);
 
-		$errorStats = array(
+		$pageNotFoundStats = array(
 			'column' => 'middle',
 			'position' => 3,
 			'hidden' => false,
@@ -43,7 +43,7 @@ class AnalyticsInstaller extends ModuleInstaller
 		// insert widgets
 		$this->insertDashboardWidget('analytics', 'traffic_sources', $trafficSources);
 		$this->insertDashboardWidget('analytics', 'visitors', $visitors);
-		$this->insertDashboardWidget('analytics', '404_statistics', $errorStats);
+		$this->insertDashboardWidget('analytics', 'page_not_found_stats', $pageNotFoundStats);
 	}
 
 	/**
@@ -80,7 +80,7 @@ class AnalyticsInstaller extends ModuleInstaller
 		$this->setActionRights(1, 'analytics', 'settings');
 		$this->setActionRights(1, 'analytics', 'traffic_sources');
 		$this->setActionRights(1, 'analytics', 'visitors');
-		$this->setActionRights(1, 'analytics', '404_statistics');
+		$this->setActionRights(1, 'analytics', 'page_not_found_stats');
 
 		// set navigation
 		$navigationMarketingId = $this->setNavigation(null, 'Marketing', 'analytics/index', null, 4);

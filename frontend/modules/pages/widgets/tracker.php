@@ -87,7 +87,7 @@ class FrontendPagesWidgetTracker extends FrontendBaseWidget
 
 		$stats['date'] = FrontendModel::getUTCDate('Y-m-d H:i:s');
 
-		// insert the stats and trigger an event
-		$stats['id'] = (int) FrontendPagesModel::insertErrorPageStatistics($stats);
+		// insert the stats
+		FrontendPagesModel::insertPageNotFoundStats($stats);
 	}
 }
