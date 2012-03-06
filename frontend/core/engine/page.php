@@ -118,6 +118,9 @@ class FrontendPage extends FrontendBaseObject
 		// store statistics
 		$this->storeStatistics();
 
+		// catch changes in the statuscode
+		if($this->statusCode === 404) $this->breadcrumb = new FrontendBreadcrumb(404);
+
 		// display
 		$this->display();
 

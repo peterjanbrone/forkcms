@@ -37,7 +37,7 @@ class FrontendBreadcrumb extends FrontendBaseObject
 		$homeInfo = FrontendNavigation::getPageInfo(1);
 
 		// add homepage as first item (with correct element)
-		if($pageId !== null) $this->addElement($homeInfo['navigation_title'], FrontendNavigation::getURL(1));
+		$this->addElement($homeInfo['navigation_title'], FrontendNavigation::getURL(1));
 
 		// get other pages
 		$pages = ($pageId === null)
@@ -79,6 +79,9 @@ class FrontendBreadcrumb extends FrontendBaseObject
 
 		// reverse so everything is in place
 		krsort($items);
+
+		// when 404 set breadcrumb manually
+		if($pageId === 404) $items = array(array('title'=>'404', 'url' => null));
 
 		// loop and add elements
 		foreach($items as $row) $this->addElement($row['title'], $row['url']);
