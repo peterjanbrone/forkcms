@@ -26,7 +26,7 @@ class FrontendBreadcrumb extends FrontendBaseObject
 	/**
 	 * Default constructor
 	 */
-	public function __construct()
+	public function __construct($pageId = null)
 	{
 		parent::__construct();
 
@@ -37,10 +37,12 @@ class FrontendBreadcrumb extends FrontendBaseObject
 		$homeInfo = FrontendNavigation::getPageInfo(1);
 
 		// add homepage as first item (with correct element)
-		$this->addElement($homeInfo['navigation_title'], FrontendNavigation::getURL(1));
+		if($pageId !== null) $this->addElement($homeInfo['navigation_title'], FrontendNavigation::getURL(1));
 
 		// get other pages
-		$pages = $this->URL->getPages();
+		$pages = ($pageId === null)
+			? $this->URL->getPages()
+			: null;
 
 		// init vars
 		$items = array();

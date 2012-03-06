@@ -96,7 +96,9 @@ class FrontendPage extends FrontendBaseObject
 		if($this->pageId == 404) $this->statusCode = 404;
 
 		// create breadcrumb instance
-		$this->breadcrumb = new FrontendBreadcrumb();
+		$this->breadcrumb = ($pageId === null)
+			? new FrontendBreadcrumb()
+			: new FrontendBreadcrumb($pageId);
 
 		// create header instance
 		$this->header = new FrontendHeader();
