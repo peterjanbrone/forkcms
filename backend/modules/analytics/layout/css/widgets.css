@@ -26,6 +26,10 @@
 		font-size: 11px;
 	}
 
+#pageNotFoundStatsWidget {
+	width: 270px;
+	margin: 0 auto;
+}
 /* Hide header links */
 
 #widgetAnalyticsTrafficSources .box .box h3 a, #widgetAnalyticsTrafficSources .box .box h4 a, #widgetAnalyticsTrafficSources .dataGridHolder .tableHeading h3 a {

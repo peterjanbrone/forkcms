@@ -32,9 +32,6 @@
 				</ul>
 			</div>
 			<div id="pageNotFoundStatsWidget">&nbsp;</div>
-			<p>
-				<a href="http://highcharts.com/" class="analyticsBacklink">Highcharts</a>
-			</p>
 		{/option:analyticsPageNotFoundStatsGraphData}
 
 		{option:!analyticsPageNotFoundStatsGraphData}
@@ -45,45 +42,23 @@
 			</p>
 		{/option:!analyticsPageNotFoundStatsGraphData}
 
-		<div id="tabs" class="tabs">
-			<ul>
-				<li><a href="#tabAnalyticsReferrers">{$lblTopReferrers|ucfirst}</a></li>
-				<li><a href="#tabAnalyticsKeywords">{$lblTopKeywords|ucfirst}</a></li>
-			</ul>
-
-			<div id="tabAnalyticsReferrers">
-				{* Top referrers *}
-				<div class="dataGridHolder" id="dataGridReferrers">
-					{option:dgAnalyticsReferrers}
-						{$dgAnalyticsReferrers}
-					{/option:dgAnalyticsReferrers}
-
-					{option:!dgAnalyticsReferrers}
-						<table class="dataGrid">
-							<tr>
-								<td>{$msgNoReferrers}</td>
-							</tr>
-						</table>
-					{/option:!dgAnalyticsReferrers}
-				</div>
+		<div class="boxLevel2">
+			<div class=" heading">
+				<h3 id="pageNotFoundDate">{$pageNotFoundDate}</h3>
 			</div>
-
-			<div id="tabAnalyticsKeywords">
-				{* Top keywords *}
-				<div class="dataGridHolder" id="dataGridKeywords">
-					{option:dgAnalyticsKeywords}
-						{$dgAnalyticsKeywords}
-					{/option:dgAnalyticsKeywords}
-
-					{option:!dgAnalyticsKeywords}
-						<table class="dataGrid">
-							<tr>
-								<td>{$msgNoKeywords}</td>
-							</tr>
-						</table>
-					{/option:!dgAnalyticsKeywords}
-				</div>
+			{option:missingPages}
+			<div id="pageNotFoundDetails" class="dataGridHolder">
+				<table class="dataGrid">
+					<tbody>
+						{iteration:missingPages.page}
+						<tr class="{cycle:'odd':'even'}">
+							<td class="name">{$missingPages.page.url}</td>
+						</tr>
+						{/iteration:missingPages.page}
+					</tbody>
+				</table>
 			</div>
+			{/option:missingPages}
 		</div>
 	</div>
 </div>

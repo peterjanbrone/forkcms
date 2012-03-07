@@ -14,12 +14,6 @@
 */
 class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 {
-	/**
-	 * Holds all the 404 page stats
-	 *
-	 * @var	array
-	 */
-	private $stats = array();
 
 	/**
 	 * Execute the widget
@@ -45,28 +39,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$this->header->addJS('dashboard.js', 'analytics');
 
 		$this->parse();
-		//$this->getData();
 		$this->display();
-	}
-
-	/**
-	 * Parse into template
-	 */
-	private function getData()
-	{
-		$URL = SITE_URL . '/backend/cronjob.php?module=analytics&action=get_error_page_statistics&id=3';
-
-		// set options
-		$options = array();
-		$options[CURLOPT_URL] = $URL;
-		if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) $options[CURLOPT_FOLLOWLOCATION] = true;
-		$options[CURLOPT_RETURNTRANSFER] = true;
-		$options[CURLOPT_TIMEOUT] = 1;
-
-		$curl = curl_init();
-		curl_setopt_array($curl, $options);
-		curl_exec($curl);
-		curl_close($curl);
 	}
 
 	/**
@@ -123,5 +96,9 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$this->tpl->assign('analyticsPageNotFoundStatsMaxYAxis', $maxYAxis);
 		$this->tpl->assign('analyticsPageNotFoundStatsTickInterval', ($maxYAxis == 2 ? '1' : ''));
 		$this->tpl->assign('analyticsPageNotFoundStatsGraphData', $graphData);
+
+		// assign the date + details
+		$this->tpl->assign('pageNotFoundDate', date("D F j", (int)$dashboardData[2]['timestamp']) . ' missing pages:');
+		$this->tpl->assign('missingPages', $dashboardData[2]);
 	}
 }

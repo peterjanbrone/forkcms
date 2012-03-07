@@ -294,29 +294,81 @@ class BackendAnalyticsModel
 			$results[$counter] = array();
 			$results[$counter]['timestamp'] = (string) ($startTimestamp + ($counter * 86400));
 			$results[$counter]['pageviews'] = '0';
+			$results[$counter]['page'] = array();
+			$results[$counter]['referrer'] = '';
 			$counter++;
 		}
 
 		// now get the data
 		$db = BackendModel::getDB();
-		$data = array();
-
-		// get the error page statistics
 		$data = (array) $db->getRecords(
-				'SELECT UNIX_TIMESTAMP(i.date) AS timestamp, COUNT(i.id) AS pageviews
+				'SELECT i.page, i.referrer, UNIX_TIMESTAMP(i.date) AS timestamp, DAY(i.date) AS day
 				FROM `analytics_error_pages` AS i
 				WHERE UNIX_TIMESTAMP(i.date) BETWEEN ' . $startTimestamp . ' AND ' . $endTimestamp . '
-				GROUP BY DAY(i.date)
-				ORDER BY i.date ASC'
+				ORDER BY DAY(i.date) ASC'
 		);
 
+		// filter it to retrieve pagehits etc in a neat array
+		$filteredData = array();
+
+		// get the first day
+		$day = $data[0]['day'];
+
+		// loop all data
+		$index = 0;
+		for($i = 0; $i < count($data); $i)
+		{
+			// init the arrays
+			$filteredData[$index]['page'] = array();
+			$filteredData[$index]['referrer'] = array();
+
+			// prepare some variables
+			$counter = 0;
+			$pageArray = array();
+			$referrerArray = array();
+
+			// loop further while the day stays te same
+			while($data[$i + $counter]['day'] === $day)
+			{
+				array_push($pageArray, array('url'=> $data[$i + $counter]['page']));
+				array_push($referrerArray, array('url'=> $data[$i + $counter]['referrer']));
+				$counter++;
+
+				// break if index gets too big
+				if($i + $counter >= count($data)) break;
+			}
+
+			// save the new data
+			$filteredData[$index]['page'] = $pageArray;
+			$filteredData[$index]['referrer'] = $referrerArray;
+			$filteredData[$index]['timestamp'] = $data[$i]['timestamp'];
+			$filteredData[$index]['pageviews'] = count($pageArray);
+
+			// get the new day
+			if($i + $counter < count($data)) $day = $data[$i + $counter]['day'];
+
+			// update $i with the # of pageviews
+			$i += $counter;
+			$index++;
+		}
+
+		// filter in the new data into the "model" results array
 		for($i = 0; $i < count($results); $i++)
 		{
-			foreach($data as $dataItem)
+			for($j = 0; $j < count($filteredData); $j++)
 			{
-				if(((int)$dataItem['timestamp'] > (int)$results[$i]['timestamp']) &&
-					((int)$dataItem['timestamp'] < (int)$results[++$i]['timestamp']))
-						$results[$i]['pageviews'] = (string)$dataItem['pageviews'];
+				// set all dates to 00:00 'o clock (GMT +1)
+				$filteredData[$j]['timestamp'] -= $filteredData[$j]['timestamp'] % 86400 + 3600;
+
+				// if the date is between the model-date and the day after -> insert it in the model
+				if((int)$filteredData[$j]['timestamp'] >= (int)$results[$i]['timestamp']
+						&& (int)$filteredData[$j]['timestamp'] <= (int)$results[$i]['timestamp'] + 86400)
+				{
+					$results[$i]['timestamp'] = (string)$filteredData[$j]['timestamp'];
+					$results[$i]['pageviews'] = (string)$filteredData[$j]['pageviews'];
+					$results[$i]['page'] = (array)$filteredData[$j]['page'];
+					$results[$i]['referrer'] = (array)$filteredData[$j]['referrer'];
+				}
 			}
 		}
 

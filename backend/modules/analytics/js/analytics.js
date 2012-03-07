@@ -3,6 +3,7 @@
  *
  * @author	Annelies Vanextergem <annelies@netlash.com>
  * @author	Thomas Deceuninck <thomasdeceuninck@netlash.com>
+ * @author  Peter-Jan Brone <peterjan.brone@wijs.be>
  */
 jsBackend.analytics =
 {
@@ -322,12 +323,10 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 
 		// refresh the datagrid when clicking on the chartnodes
 		$('#pageNotFoundStatsWidget .highcharts-tracker').click(function() {
+
 			// extract the date from the tooltip
 			var tooltipText = $('#pageNotFoundStatsWidget .highcharts-tooltip').text();
 			var dateString = tooltipText.replace('Pageviews', '').split(':')[0];
-			
-			// return if we don't have a dite
-			if(!(dateString.length > 0)) return;
 			
 			// append the year and get the unix timestamp
 			var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
@@ -335,82 +334,47 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 			var timestamp = Math.round(date.getTime() / 1000);
 
 			// collapse the datagrid
-			$('#tabs').slideUp('slow', function() {});
+			$('#pageNotFoundDetails').slideUp('medium', function() {});
 			
-			// get data
-			var page = jsBackend.analytics.loading.page;
-			var identifier = jsBackend.analytics.loading.identifier;
-			$longLoader = $('#longLoader');
-			$statusError = $('#statusError');
-			$loading = $('#loading');
-			
-			// make the datagrid refresh call
+			// call to refresh the grid
 			$.ajax(
 			{
-				timeout: 5000,
 				data:
 				{
-					fork: { action: 'reload_datagrid' },
-					page: page,
-					identifier: identifier
+					fork: { action: 'reload_datagrid' , module: 'analytics'},
+					timestamp: timestamp
 				},
-				success: function(data, textStatus)
+				success: function(json, textStatus)
 				{
-					// redirect
-					if(data.data.status == 'unauthorized') { window.location = $('#settingsUrl').html(); }
-
-					if(data.code == 200)
+					if(json.code != 200)
 					{
-						// get redirect url
-						var url = document.location.protocol +'//'+ document.location.host;
-						url += $('#redirect').html();
-						if($('#redirectGet').html() != '') url += '&' + $('#redirectGet').html();
-
-						// redirect
-						if(data.data.status == 'done') window.location = url;
+						// show error if needed
+						if(jsBackend.debug) alert(textStatus);
 					}
 					else
 					{
-						// clear interval
-						clearInterval(jsBackend.analytics.loading.interval);
+						// reset the date
+						$('#pageNotFoundDate').text(json.data.date);
 
-						// loading bar stuff
-						$longLoader.show();
+						// build the new table html
+						var html = '';
+						var counter = 0;
+						for(var url in json.data.data)
+						{
+							(counter % 2 == 0)
+								? html += '<tr class="even"><td class="name">' + json.data.data[url] + '</td></tr>'
+								: html += '<tr class="odd"><td class="name">' + json.data.data[url] + '</td></tr>';
+							counter++;
+						}
 
-						// show box
-						$statusError.show();
-						$loading.hide();
-
-						// show message
-						jsBackend.messages.add('error', textStatus);
-
-						// alert the user
-						if(jsBackend.debug) alert(textStatus);
+						// switch the table data
+						$('#pageNotFoundDetails tbody').empty().append(html);
 					}
-
-					// alert the user
-					if(data.code != 200 && jsBackend.debug) { alert(data.message); }
-				},
-				error: function(XMLHttpRequest, textStatus, errorThrown)
-				{
-					// clear interval
-					clearInterval(jsBackend.analytics.loading.interval);
-
-					// show box and hide loading bar
-					$statusError.show();
-					$loading.hide();
-					$longLoader.hide();
-
-					// show message
-					jsBackend.messages.add('error', textStatus);
-
-					// alert the user
-					if(jsBackend.debug) alert(textStatus);
 				}
 			});
 
 			// expand the datagrid
-			$('#tabs').slideDown('slow', function() {});
+			$('#pageNotFoundDetails').slideDown('slow', function() {});
 	    });
 	},
 
