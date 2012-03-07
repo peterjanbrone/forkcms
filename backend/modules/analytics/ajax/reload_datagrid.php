@@ -47,7 +47,7 @@ class BackendAnalyticsAjaxReloadDatagrid extends BackendBaseAJAXAction
 		$this->output(
 				self::OK,
 				array(
-						'date' => date("D F j", $timestamp) . ' missing pages:',
+						'date' => date("D j F", $timestamp) . ' missing pages:',
 						'status' => 'success',
 						'data' => $result
 				),

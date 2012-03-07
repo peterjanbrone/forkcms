@@ -51,7 +51,7 @@
 				<table class="dataGrid">
 					<tbody>
 						{iteration:missingPages.page}
-						<tr class="{cycle:'odd':'even'}">
+						<tr class="{cycle:'even':'odd'}">
 							<td class="name">{$missingPages.page.url}</td>
 						</tr>
 						{/iteration:missingPages.page}

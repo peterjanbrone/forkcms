@@ -308,6 +308,9 @@ class BackendAnalyticsModel
 				ORDER BY DAY(i.date) ASC'
 		);
 
+		// return if there's no data
+		if($data == null) return;
+
 		// filter it to retrieve pagehits etc in a neat array
 		$filteredData = array();
 
@@ -364,7 +367,6 @@ class BackendAnalyticsModel
 				if((int)$filteredData[$j]['timestamp'] >= (int)$results[$i]['timestamp']
 						&& (int)$filteredData[$j]['timestamp'] <= (int)$results[$i]['timestamp'] + 86400)
 				{
-					$results[$i]['timestamp'] = (string)$filteredData[$j]['timestamp'];
 					$results[$i]['pageviews'] = (string)$filteredData[$j]['pageviews'];
 					$results[$i]['page'] = (array)$filteredData[$j]['page'];
 					$results[$i]['referrer'] = (array)$filteredData[$j]['referrer'];

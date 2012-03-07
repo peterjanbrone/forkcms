@@ -367,6 +367,9 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 							counter++;
 						}
 
+						// insert a 'no-results-message'
+						if(html === '') html += '<tr class="even"><td class="name">none...</td></tr>';
+
 						// switch the table data
 						$('#pageNotFoundDetails tbody').empty().append(html);
 					}
