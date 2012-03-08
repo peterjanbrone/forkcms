@@ -35,7 +35,7 @@ class BackendAnalyticsModel
 	 *
 	 * @var	array
 	 */
-	private static $data = array(), $dashboardData = array();
+	private static $data = array(), $dashboardData = array(), $pageNotFoundData = array();
 
 	/**
 	 * Checks the settings and optionally returns an array with warnings
@@ -279,97 +279,126 @@ class BackendAnalyticsModel
 	}
 
 	/**
+	 * Get dashboard page not found statistics data from the cache
+	 *
+	 * @param int $startTimestamp The start timestamp for the cache file.
+	 * @param int $endTimestamp The end timestamp for the cache file.
+	 * @return array
+	 */
+	public static function getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp)
+	{
+		// doesnt exist in cache
+		if(!isset(self::$pageNotFoundData) || empty(self::$pageNotFoundData))
+		{
+			self::$pageNotFoundData = self::getDashboardPageNotFoundData($startTimestamp, $endTimestamp);
+		}
+
+		return self::$pageNotFoundData;
+	}
+
+	/**
 	 * Function which retrieves all 404 page data
 	 *
 	 */
 	public static function getDashboardPageNotFoundData($startTimestamp, $endTimestamp)
 	{
+		// fetch the data
+		$data = BackendAnalyticsHelper::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
+
 		// we need stats for 9 days so first build that empty array
 		$results = array();
 		$counter = (int) 0;
 
-		// make an array with all the dates and no content
+		// make a container array with each day, regardless if there's
+		// any data for that day
 		while($counter < 9)
 		{
 			$results[$counter] = array();
-			$results[$counter]['timestamp'] = (string) ($startTimestamp + ($counter * 86400));
-			$results[$counter]['pageviews'] = '0';
-			$results[$counter]['page'] = array();
-			$results[$counter]['referrer'] = '';
+			$results[$counter]['timestamp'] = (int)$startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
+			$results[$counter]['pages'] = array();
+			$results[$counter]['pages_info'] = array();
 			$counter++;
 		}
 
-		// now get the data
-		$db = BackendModel::getDB();
-		$data = (array) $db->getRecords(
-				'SELECT i.page, i.referrer, UNIX_TIMESTAMP(i.date) AS timestamp, DAY(i.date) AS day
-				FROM `analytics_error_pages` AS i
-				WHERE UNIX_TIMESTAMP(i.date) BETWEEN ' . $startTimestamp . ' AND ' . $endTimestamp . '
-				ORDER BY DAY(i.date) ASC'
-		);
+		// no data?
+		if(count($data) === 0) return $results;
 
-		// return if there's no data
-		if($data == null) return;
-
-		// filter it to retrieve pagehits etc in a neat array
+		// filter the data
 		$filteredData = array();
 
 		// get the first day
-		$day = $data[0]['day'];
+		$timestamp = $data[0]['timestamp'];
 
 		// loop all data
 		$index = 0;
 		for($i = 0; $i < count($data); $i)
 		{
 			// init the arrays
-			$filteredData[$index]['page'] = array();
-			$filteredData[$index]['referrer'] = array();
+			$filteredData[$index]['timestamp'] = $data[$i]['timestamp'];
+			$filteredData[$index]['pages'] = array();
+			$filteredData[$index]["pages_info"] = array();
 
-			// prepare some variables
+			// collect all data for that day
 			$counter = 0;
-			$pageArray = array();
-			$referrerArray = array();
-
-			// loop further while the day stays te same
-			while($data[$i + $counter]['day'] === $day)
+			while($data[$i + $counter]['timestamp'] === $timestamp)
 			{
-				array_push($pageArray, array('url'=> $data[$i + $counter]['page']));
-				array_push($referrerArray, array('url'=> $data[$i + $counter]['referrer']));
+				// get the missing page url
+				$url = urldecode((string)$data[$i + $counter]['eventAction']);
+
+				// too long to display?
+				if(strlen($url) > 50)
+				{
+					// cut off at the '?'
+					$parts = explode('?', $url);
+					$url = $parts[0] . '?';
+
+					// still too long?
+					if(strlen($url) > 50) {
+						$url = substr((string)$url, 0, 49);
+					}
+
+					// indicate it's been cut off
+					$url .= '...';
+				}
+
+				// store it
+				array_push($filteredData[$index]['pages'], array('url'=> $url));
+
+				// store all other info
+				array_push($filteredData[$index]['pages_info'], array(
+						'full_url'=> $data[$i + $counter]['eventAction'],
+						'unique_events'=> $data[$i + $counter]['uniqueEvents'],
+						'pageviews'=> $data[$i + $counter]['pageviews'],
+						'browser'=> $data[$i + $counter]['browser'],
+						'browser_version'=> $data[$i + $counter]['browserVersion'],
+						'language'=> $data[$i + $counter]['language'],
+						'referrer'=> $data[$i + $counter]['referralPath']
+						));
+
 				$counter++;
 
 				// break if index gets too big
-				if($i + $counter >= count($data)) break;
+				if($i + $counter === count($data)) break;
 			}
 
-			// save the new data
-			$filteredData[$index]['page'] = $pageArray;
-			$filteredData[$index]['referrer'] = $referrerArray;
-			$filteredData[$index]['timestamp'] = $data[$i]['timestamp'];
-			$filteredData[$index]['pageviews'] = count($pageArray);
-
 			// get the new day
-			if($i + $counter < count($data)) $day = $data[$i + $counter]['day'];
+			if($i + $counter < count($data)) $timestamp = $data[$i + $counter]['timestamp'];
 
-			// update $i with the # of pageviews
+			// make sure all counters get updated
 			$i += $counter;
 			$index++;
 		}
 
-		// filter in the new data into the "model" results array
+		// insert the filtered data into the results array
 		for($i = 0; $i < count($results); $i++)
 		{
 			for($j = 0; $j < count($filteredData); $j++)
 			{
-				// set all dates to 00:00 'o clock (GMT +1)
-				$filteredData[$j]['timestamp'] -= $filteredData[$j]['timestamp'] % 86400 + 3600;
-
-				// if the date is between the model-date and the day after -> insert it in the model
-				if((int)$filteredData[$j]['timestamp'] >= (int)$results[$i]['timestamp']
-						&& (int)$filteredData[$j]['timestamp'] <= (int)$results[$i]['timestamp'] + 86400)
+				// insert if the dates match
+				if((int)$results[$i]['timestamp'] == (int)$filteredData[$j]['timestamp'])
 				{
-					$results[$i]['pageviews'] = (string)$filteredData[$j]['pageviews'];
-					$results[$i]['page'] = (array)$filteredData[$j]['page'];
-					$results[$i]['referrer'] = (array)$filteredData[$j]['referrer'];
+					$results[$i]['pages'] = (array)$filteredData[$j]['pages'];
+					$results[$i]['pages_info'] = (array)$filteredData[$j]['pages_info'];
 				}
 			}
 		}

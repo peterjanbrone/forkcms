@@ -48,13 +48,13 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 	private function parse()
 	{
 		$maxYAxis = 2;
-		$metrics = array('pageviews');
+		$metrics = array('pages');
 		$graphData = array();
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
 
 		// get dashboard data
-		$dashboardData = BackendAnalyticsModel::getDashboardPageNotFoundData($startTimestamp, $endTimestamp);
+		$dashboardData = BackendAnalyticsModel::getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp);
 
 		// there are some metrics
 		if($dashboardData !== false)
@@ -77,7 +77,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 
 					// build array
 					$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-					$graphData[$i]['data'][$j]['value'] = (string) $data[$metric];
+					$graphData[$i]['data'][$j]['value'] = (string) count($data[$metric]);
 				}
 			}
 		}
@@ -98,12 +98,12 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$this->tpl->assign('analyticsPageNotFoundStatsGraphData', $graphData);
 
 		// assign the date
-		$this->tpl->assign('pageNotFoundDate', date("D j F", (int)$dashboardData[0]['timestamp']) . ' missing pages:');
+		$this->tpl->assign('pageNotFoundDate', date("D j M", (int)$dashboardData[0]['timestamp']) . ' missing pages:');
 
 		// insert a message if there were no missing pages that day
-		if(count($dashboardData[0]['page']) === 0)
+		if(count($dashboardData[0]['pages']) === 0)
 		{
-			$dashboardData[0]['page'][0] = array('url' => 'none...');
+			$dashboardData[0]['pages'][0] = array('url' => 'none...');
 		}
 
 		// assign the data

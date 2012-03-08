@@ -326,16 +326,29 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 
 			// extract the date from the tooltip
 			var tooltipText = $('#pageNotFoundStatsWidget .highcharts-tooltip').text();
-			var dateString = tooltipText.replace('Pageviews', '').split(':')[0];
+			var dateString = tooltipText.replace('Pages', '').split(':')[0];
 			
 			// append the year and get the unix timestamp
 			var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
 			date = new Date(dateString + ' ' + year);
-			var timestamp = Math.round(date.getTime() / 1000);
+			var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
+
+			// check if we even need to refresh
+			if($('#pageNotFoundDate').text() === dateString + ' missing pages:') return;
 
 			// collapse the datagrid
 			$('#pageNotFoundDetails').slideUp('medium', function() {});
-			
+
+			// reset the date
+			$('#pageNotFoundDate').text(dateString + ' missing pages:');
+
+			// move the spinner !
+			var ajaxSpinner = $('#ajaxSpinner');
+			var style = ajaxSpinner.attr('style');
+			ajaxSpinner.remove();
+			ajaxSpinner.insertAfter('#pageNotFoundDate');
+			ajaxSpinner.attr('style', 'position:relative; left: 8px;');
+
 			// call to refresh the grid
 			$.ajax(
 			{
@@ -353,32 +366,45 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 					}
 					else
 					{
-						// reset the date
-						$('#pageNotFoundDate').text(json.data.date);
-
 						// build the new table html
 						var html = '';
 						var counter = 0;
+
 						for(var url in json.data.data)
 						{
 							(counter % 2 == 0)
-								? html += '<tr class="even"><td class="name">' + json.data.data[url] + '</td></tr>'
-								: html += '<tr class="odd"><td class="name">' + json.data.data[url] + '</td></tr>';
+								? html += '<tr class="even"><td>' + json.data.data[url] + '</td></tr>'
+								: html += '<tr class="odd"><td>' + json.data.data[url] + '</td></tr>';
 							counter++;
 						}
 
 						// insert a 'no-results-message'
-						if(html === '') html += '<tr class="even"><td class="name">none...</td></tr>';
+						if(html === '') html += '<tr class="even"><td>none...</td></tr>';
 
 						// switch the table data
 						$('#pageNotFoundDetails tbody').empty().append(html);
+
+						// expand the datagrid
+						$('#pageNotFoundDetails').slideDown('slow', function() {});
+
+						// show details on click
+						$("#pageNotFoundDetails td").not(":contains('none...')").on('click', function(){console.log('click');});
+
+						// move the spinner back to it's place
+						ajaxSpinner.attr('style', style);
+						ajaxSpinner.insertAfter('#messaging');
 					}
 				}
 			});
-
-			// expand the datagrid
-			$('#pageNotFoundDetails').slideDown('slow', function() {});
 	    });
+
+		$("#pageNotFoundDetails td").not(":contains('none...')").on('click', function(){console.log('click');});
+
+	},
+
+	showDetails: function()
+	{
+	    console.log('jupla');
 	},
 
 	// add new chart

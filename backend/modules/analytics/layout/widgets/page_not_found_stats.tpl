@@ -50,11 +50,11 @@
 			<div id="pageNotFoundDetails" class="dataGridHolder">
 				<table class="dataGrid">
 					<tbody>
-						{iteration:missingPages.page}
+						{iteration:missingPages.pages}
 						<tr class="{cycle:'even':'odd'}">
-							<td class="name">{$missingPages.page.url}</td>
+							<td>{$missingPages.pages.url}</td>
 						</tr>
-						{/iteration:missingPages.page}
+						{/iteration:missingPages.pages}
 					</tbody>
 				</table>
 			</div>

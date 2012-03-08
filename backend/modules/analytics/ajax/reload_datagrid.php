@@ -30,15 +30,15 @@ class BackendAnalyticsAjaxReloadDatagrid extends BackendBaseAJAXAction
 		// get the data
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
-		$data = BackendAnalyticsModel::getDashboardPageNotFoundData($startTimestamp, $endTimestamp);
+		$data = BackendAnalyticsModel::getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp);
 
 		// filter the data
 		$result = array();
 		foreach($data as $dataItem)
 		{
-			if($dataItem['timestamp'] === $timestamp)
+			if((int)$dataItem['timestamp'] === (int)$timestamp)
 			{
-				foreach($dataItem['page'] as $page)
+				foreach($dataItem['pages'] as $page)
 					array_push($result, $page['url']);
 			}
 		}
@@ -47,7 +47,6 @@ class BackendAnalyticsAjaxReloadDatagrid extends BackendBaseAJAXAction
 		$this->output(
 				self::OK,
 				array(
-						'date' => date("D j F", $timestamp) . ' missing pages:',
 						'status' => 'success',
 						'data' => $result
 				),
