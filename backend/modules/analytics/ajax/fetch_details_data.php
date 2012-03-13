@@ -32,14 +32,26 @@ class BackendAnalyticsAjaxFetchDetailsData extends BackendBaseAJAXAction
 		// get the data
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
-		$data = BackendAnalyticsModel::getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp, $index, $timestamp);
+		$data = BackendAnalyticsModel::getDashboardData(array('pages'), $startTimestamp, $endTimestamp, true);
 
+		// filter the data
+		$data = BackendAnalyticsModel::filterData($data);
+
+		// get the correct day
+		$result = array();
+		foreach($data as $dataItem)
+		{
+			if((int)$dataItem['timestamp'] === (int)$timestamp)
+			{
+				$result = $dataItem['pages_info'][$index];
+			}
+		}
 		// return status
 		$this->output(
 				self::OK,
 				array(
 						'status' => 'success',
-						'data' => $data
+						'data' => $result
 				),
 				'Data has been retrieved.'
 		);

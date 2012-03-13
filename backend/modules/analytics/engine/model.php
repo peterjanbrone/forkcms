@@ -109,6 +109,113 @@ class BackendAnalyticsModel
 	}
 
 	/**
+	 * Filter dashboardata for highchart use
+	 *
+	 * @param array data
+	 * @return array
+	 */
+	public static function filterData($data)
+	{
+		// we need stats for 9 days so first build that empty array
+		$results = array();
+		$counter = (int) 0;
+
+		// make a container array with each day, regardless if there's
+		// any data for that day
+		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
+		while($counter < 9)
+		{
+			$results[$counter] = array();
+			$results[$counter]['timestamp'] = (int)$startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
+			$results[$counter]['pages'] = array();
+			$results[$counter]['pages_info'] = array();
+			$counter++;
+		}
+
+		// filter the data
+		$filteredData = array();
+
+		// get the first day
+		$timestamp = $data[0]['timestamp'];
+
+		// loop all data
+		$index = 0;
+		for($i = 0; $i < count($data); $i)
+		{
+			// init the arrays
+			$filteredData[$index]['timestamp'] = $data[$i]['timestamp'];
+			$filteredData[$index]['pages'] = array();
+			$filteredData[$index]["pages_info"] = array();
+
+			// collect all data for that day
+			$counter = 0;
+			while($data[$i + $counter]['timestamp'] === $timestamp)
+			{
+				// get the missing page url
+				$url = urldecode((string)$data[$i + $counter]['eventAction']);
+
+				// too long to display?
+				if(strlen($url) > 40)
+				{
+					// cut off at the '?'
+					$parts = explode('?', $url);
+					$url = $parts[0] . '?';
+
+					// still too long?
+					if(strlen($url) > 40) {
+						$url = substr((string)$url, 0, 39);
+					}
+
+					// indicate it's been cut off
+					$url .= '...';
+				}
+
+				// store index and url
+				array_push($filteredData[$index]['pages'], array('index'=> $i + $counter, 'url'=> $url));
+
+				// store all other info
+				array_push($filteredData[$index]['pages_info'], array(
+						'full_url'=> urldecode((string)$data[$i + $counter]['eventAction']),
+						'unique_events'=> $data[$i + $counter]['uniqueEvents'],
+						'pageviews'=> $data[$i + $counter]['pageviews'],
+						'browser'=> $data[$i + $counter]['browser'],
+						'browser_version'=> $data[$i + $counter]['browserVersion'],
+						'language'=> $data[$i + $counter]['language'],
+						'referrer'=> $data[$i + $counter]['referralPath']
+				));
+
+				$counter++;
+
+				// break if index gets too big
+				if($i + $counter === count($data)) break;
+			}
+
+			// get the new day
+			if($i + $counter < count($data)) $timestamp = $data[$i + $counter]['timestamp'];
+
+			// make sure all counters get updated
+			$i += $counter;
+			$index++;
+		}
+
+		// insert the filtered data into the results array
+		for($i = 0; $i < count($results); $i++)
+		{
+			for($j = 0; $j < count($filteredData); $j++)
+			{
+				// insert if the dates match
+				if((int)$results[$i]['timestamp'] == (int)$filteredData[$j]['timestamp'])
+				{
+					$results[$i]['pages'] = (array)$filteredData[$j]['pages'];
+					$results[$i]['pages_info'] = (array)$filteredData[$j]['pages_info'];
+				}
+			}
+		}
+
+		return $results;
+	}
+
+	/**
 	 * Get an aggregate
 	 *
 	 * @param string $name The name of the aggregate to look for.
@@ -276,147 +383,6 @@ class BackendAnalyticsModel
 		}
 
 		return self::$dashboardData;
-	}
-
-	/**
-	 * Get dashboard page not found statistics data from the cache
-	 *
-	 * @param int $startTimestamp The start timestamp for the cache file.
-	 * @param int $endTimestamp The end timestamp for the cache file.
-	 * @param int[optional] $index The index of the page to retrieve
-	 * @param int[optional] $timestamp The timestamp which specifies the day to retrieve
-	 * @return array
-	 */
-	public static function getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp, $index = null, $timestamp = null)
-	{
-		// doesnt exist in cache
-		if(!isset(self::$pageNotFoundData) || empty(self::$pageNotFoundData))
-		{
-			self::$pageNotFoundData = self::getDashboardPageNotFoundData($startTimestamp, $endTimestamp);
-		}
-
-		// looking for details?
-		if($index !== null && $timestamp !== null)
-		{
-			foreach(self::$pageNotFoundData as $dataItem)
-			{
-				if((int)$dataItem['timestamp'] === (int)$timestamp)
-				{
-					return $dataItem['pages_info'][$index];
-				}
-			}
-		}
-		return self::$pageNotFoundData;
-	}
-
-	/**
-	 * Function which retrieves all 404 page data
-	 *
-	 */
-	public static function getDashboardPageNotFoundData($startTimestamp, $endTimestamp)
-	{
-		// fetch the data
-		$data = BackendAnalyticsHelper::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
-
-		// we need stats for 9 days so first build that empty array
-		$results = array();
-		$counter = (int) 0;
-
-		// make a container array with each day, regardless if there's
-		// any data for that day
-		while($counter < 9)
-		{
-			$results[$counter] = array();
-			$results[$counter]['timestamp'] = (int)$startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
-			$results[$counter]['pages'] = array();
-			$results[$counter]['pages_info'] = array();
-			$counter++;
-		}
-
-		// no data?
-		if(count($data) === 0) return $results;
-
-		// filter the data
-		$filteredData = array();
-
-		// get the first day
-		$timestamp = $data[0]['timestamp'];
-
-		// loop all data
-		$index = 0;
-		for($i = 0; $i < count($data); $i)
-		{
-			// init the arrays
-			$filteredData[$index]['timestamp'] = $data[$i]['timestamp'];
-			$filteredData[$index]['pages'] = array();
-			$filteredData[$index]["pages_info"] = array();
-
-			// collect all data for that day
-			$counter = 0;
-			while($data[$i + $counter]['timestamp'] === $timestamp)
-			{
-				// get the missing page url
-				$url = urldecode((string)$data[$i + $counter]['eventAction']);
-
-				// too long to display?
-				if(strlen($url) > 40)
-				{
-					// cut off at the '?'
-					$parts = explode('?', $url);
-					$url = $parts[0] . '?';
-
-					// still too long?
-					if(strlen($url) > 40) {
-						$url = substr((string)$url, 0, 39);
-					}
-
-					// indicate it's been cut off
-					$url .= '...';
-				}
-
-				// store index and url
-				array_push($filteredData[$index]['pages'], array('index'=> $i + $counter, 'url'=> $url));
-
-				// store all other info
-				array_push($filteredData[$index]['pages_info'], array(
-						'full_url'=> urldecode((string)$data[$i + $counter]['eventAction']),
-						'unique_events'=> $data[$i + $counter]['uniqueEvents'],
-						'pageviews'=> $data[$i + $counter]['pageviews'],
-						'browser'=> $data[$i + $counter]['browser'],
-						'browser_version'=> $data[$i + $counter]['browserVersion'],
-						'language'=> $data[$i + $counter]['language'],
-						'referrer'=> $data[$i + $counter]['referralPath']
-						));
-
-				$counter++;
-
-				// break if index gets too big
-				if($i + $counter === count($data)) break;
-			}
-
-			// get the new day
-			if($i + $counter < count($data)) $timestamp = $data[$i + $counter]['timestamp'];
-
-			// make sure all counters get updated
-			$i += $counter;
-			$index++;
-		}
-
-		// insert the filtered data into the results array
-		for($i = 0; $i < count($results); $i++)
-		{
-			for($j = 0; $j < count($filteredData); $j++)
-			{
-				// insert if the dates match
-				if((int)$results[$i]['timestamp'] == (int)$filteredData[$j]['timestamp'])
-				{
-					$results[$i]['pages'] = (array)$filteredData[$j]['pages'];
-					$results[$i]['pages_info'] = (array)$filteredData[$j]['pages_info'];
-				}
-			}
-		}
-
-		return $results;
 	}
 
 	/**

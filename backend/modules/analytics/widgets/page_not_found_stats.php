@@ -54,11 +54,14 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$endTimestamp = mktime(0, 0, 0);
 
 		// get dashboard data
-		$dashboardData = BackendAnalyticsModel::getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp);
+		$dashboardData = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp, true);
 
 		// there are some metrics
 		if($dashboardData !== false)
 		{
+			// make the data highchart usable
+			$dashboardData = BackendAnalyticsModel::filterData($dashboardData);
+
 			// loop metrics
 			foreach($metrics as $i => $metric)
 			{

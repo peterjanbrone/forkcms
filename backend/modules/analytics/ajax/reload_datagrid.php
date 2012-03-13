@@ -30,9 +30,10 @@ class BackendAnalyticsAjaxReloadDatagrid extends BackendBaseAJAXAction
 		// get the data
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
-		$data = BackendAnalyticsModel::getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp);
+		$data = BackendAnalyticsModel::getDashboardData(array('pages'), $startTimestamp, $endTimestamp, true);
 
 		// filter the data
+		$data = BackendAnalyticsModel::filterData($data);
 		$result = array();
 		foreach($data as $dataItem)
 		{

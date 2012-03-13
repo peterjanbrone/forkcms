@@ -119,15 +119,23 @@ class BackendAnalyticsHelper
 	public static function getDashboardData($startTimestamp, $endTimestamp)
 	{
 		// get metrics
-		$metrics = array('pageviews', 'visitors');
+		$metrics = array('pageviews', 'visitors', 'uniqueEvents');
 		$gaMetrics = array();
 		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
 
-		$dimensions = 'ga:date';
-		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $dimensions);
+		// get dimensions
+		$dimensions = array('eventAction', 'browser', 'browserVersion', 'language', 'date', 'referralPath');
+		$gaDimensions = array();
+		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
+
+		// set the sort parameter
+		$parameters = array('sort' => 'ga:date');
+
+		// get results
+		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $gaDimensions, $parameters);
 		$entries = array();
 
-		// loop visitor results
+		// loop results
 		foreach($results['entries'] as $result)
 		{
 			$timestamp = gmmktime(12, 0, 0, substr($result['date'], 4, 2), substr($result['date'], 6, 2), substr($result['date'], 0, 4));
@@ -136,9 +144,16 @@ class BackendAnalyticsHelper
 			$entry = array();
 			$entry['timestamp'] = $timestamp;
 
+			// loop metrics
 			foreach($metrics as $metric)
 			{
 				$entry[$metric] = (int) $result[$metric];
+			}
+
+			// loop dimensions
+			foreach($dimensions as $dimension)
+			{
+				if($dimension !== 'date') $entry[$dimension] = (string) $result[$dimension];
 			}
 
 			$entries[] = $entry;
@@ -427,58 +442,6 @@ class BackendAnalyticsHelper
 
 			// loop metrics
 			foreach($metrics as $metric) $entry[$metric] = (int) $result[$metric];
-
-			// add to entries array
-			$entries[] = $entry;
-		}
-
-		return $entries;
-	}
-
-	/*
-	 * Get the page not found statistics
-	 *
-	 * @param int $startTimestamp The start timestamp for the google call.
-	 * @param int $endTimestamp The end timestamp for the google call.
-	 * @return array
-	 */
-	public static function getPageNotFoundStatistics($startTimestamp, $endTimestamp)
-	{
-		// get metrics
-		$metrics = array('uniqueEvents', 'pageviews');
-		$gaMetrics = array();
-		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
-
-		// get dimensions
-		$dimensions = array('eventAction', 'browser', 'browserVersion', 'language', 'date', 'referralPath');
-		$gaDimensions = array();
-		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
-
-		// set the sort parameter
-		$parameters = array('sort' => 'ga:date');
-
-		// get results
-		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $gaDimensions, $parameters);
-
-		// init vars
-		$entries = array();
-
-		// loop visitor results
-		foreach($results['entries'] as $result)
-		{
-			// get timestamp
-			$timestamp = gmmktime(12, 0, 0, substr($result['date'], 4, 2), substr($result['date'], 6, 2), substr($result['date'], 0, 4));
-
-			// store metrics in correct format
-			$entry = array();
-			$entry['timestamp'] = $timestamp;
-
-			// loop metrics
-			foreach($metrics as $metric) $entry[$metric] = (int) $result[$metric];
-
-			// loop dimensions
-			foreach($dimensions as $dimension)
-				if($dimension !== 'date') $entry[$dimension] = (string) $result[$dimension];
 
 			// add to entries array
 			$entries[] = $entry;

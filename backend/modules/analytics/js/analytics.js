@@ -398,6 +398,7 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 			});
 	    });
 
+		// show details, except when the row text is 'none...'
 		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatsWidget.toggleDetails(e);});
 
 	},
