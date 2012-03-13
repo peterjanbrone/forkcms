@@ -47,12 +47,12 @@
 				<h3 id="pageNotFoundDate">{$pageNotFoundDate}</h3>
 			</div>
 			{option:missingPages}
-			<div id="pageNotFoundDetails" class="dataGridHolder">
+			<div id="pageNotFoundIndex" class="dataGridHolder">
 				<table class="dataGrid">
 					<tbody>
 						{iteration:missingPages.pages}
 						<tr class="{cycle:'even':'odd'}">
-							<td>{$missingPages.pages.url}</td>
+							<td data-index="{$missingPages.pages.index}">{$missingPages.pages.url}</td>
 						</tr>
 						{/iteration:missingPages.pages}
 					</tbody>

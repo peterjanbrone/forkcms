@@ -283,9 +283,11 @@ class BackendAnalyticsModel
 	 *
 	 * @param int $startTimestamp The start timestamp for the cache file.
 	 * @param int $endTimestamp The end timestamp for the cache file.
+	 * @param int[optional] $index The index of the page to retrieve
+	 * @param int[optional] $timestamp The timestamp which specifies the day to retrieve
 	 * @return array
 	 */
-	public static function getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp)
+	public static function getDashboardPageNotFoundDataFromCache($startTimestamp, $endTimestamp, $index = null, $timestamp = null)
 	{
 		// doesnt exist in cache
 		if(!isset(self::$pageNotFoundData) || empty(self::$pageNotFoundData))
@@ -293,6 +295,17 @@ class BackendAnalyticsModel
 			self::$pageNotFoundData = self::getDashboardPageNotFoundData($startTimestamp, $endTimestamp);
 		}
 
+		// looking for details?
+		if($index !== null && $timestamp !== null)
+		{
+			foreach(self::$pageNotFoundData as $dataItem)
+			{
+				if((int)$dataItem['timestamp'] === (int)$timestamp)
+				{
+					return $dataItem['pages_info'][$index];
+				}
+			}
+		}
 		return self::$pageNotFoundData;
 	}
 
@@ -346,27 +359,27 @@ class BackendAnalyticsModel
 				$url = urldecode((string)$data[$i + $counter]['eventAction']);
 
 				// too long to display?
-				if(strlen($url) > 50)
+				if(strlen($url) > 40)
 				{
 					// cut off at the '?'
 					$parts = explode('?', $url);
 					$url = $parts[0] . '?';
 
 					// still too long?
-					if(strlen($url) > 50) {
-						$url = substr((string)$url, 0, 49);
+					if(strlen($url) > 40) {
+						$url = substr((string)$url, 0, 39);
 					}
 
 					// indicate it's been cut off
 					$url .= '...';
 				}
 
-				// store it
-				array_push($filteredData[$index]['pages'], array('url'=> $url));
+				// store index and url
+				array_push($filteredData[$index]['pages'], array('index'=> $i + $counter, 'url'=> $url));
 
 				// store all other info
 				array_push($filteredData[$index]['pages_info'], array(
-						'full_url'=> $data[$i + $counter]['eventAction'],
+						'full_url'=> urldecode((string)$data[$i + $counter]['eventAction']),
 						'unique_events'=> $data[$i + $counter]['uniqueEvents'],
 						'pageviews'=> $data[$i + $counter]['pageviews'],
 						'browser'=> $data[$i + $counter]['browser'],

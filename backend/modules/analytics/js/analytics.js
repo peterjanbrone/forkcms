@@ -31,7 +31,7 @@ jsBackend.analytics.charts =
 {
 	init: function()
 	{
-		if($chartPieChart.length > 0 || $chartDoubleMetricPerDay.length > 0 || $chartSingleMetricPerDay.length > 0 || $chartWidget.length > 0)
+		if($chartPieChart.length > 0 || $chartDoubleMetricPerDay.length > 0 || $chartSingleMetricPerDay.length > 0 || $chartWidget.length > 0 || $pageNotFoundStatsWidget.length > 0)
 		{
 			Highcharts.setOptions(
 			{
@@ -337,7 +337,7 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 			if($('#pageNotFoundDate').text() === dateString + ' missing pages:') return;
 
 			// collapse the datagrid
-			$('#pageNotFoundDetails').slideUp('medium', function() {});
+			$('#pageNotFoundIndex').slideUp('medium', function() {});
 
 			// reset the date
 			$('#pageNotFoundDate').text(dateString + ' missing pages:');
@@ -373,8 +373,8 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 						for(var url in json.data.data)
 						{
 							(counter % 2 == 0)
-								? html += '<tr class="even"><td>' + json.data.data[url] + '</td></tr>'
-								: html += '<tr class="odd"><td>' + json.data.data[url] + '</td></tr>';
+								? html += '<tr class="even"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>'
+								: html += '<tr class="odd"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>';
 							counter++;
 						}
 
@@ -382,13 +382,13 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 						if(html === '') html += '<tr class="even"><td>none...</td></tr>';
 
 						// switch the table data
-						$('#pageNotFoundDetails tbody').empty().append(html);
+						$('#pageNotFoundIndex tbody').empty().append(html);
 
 						// expand the datagrid
-						$('#pageNotFoundDetails').slideDown('slow', function() {});
+						$('#pageNotFoundIndex').slideDown('slow', function() {});
 
 						// show details on click
-						$("#pageNotFoundDetails td").not(":contains('none...')").on('click', function(){console.log('click');});
+						$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatsWidget.toggleDetails(e);});
 
 						// move the spinner back to it's place
 						ajaxSpinner.attr('style', style);
@@ -398,13 +398,72 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 			});
 	    });
 
-		$("#pageNotFoundDetails td").not(":contains('none...')").on('click', function(){console.log('click');});
+		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatsWidget.toggleDetails(e);});
 
 	},
 
-	showDetails: function()
+	toggleDetails: function(e)
 	{
-	    console.log('jupla');
+		// get the row index
+		var index = e.currentTarget.attributes[0].nodeValue;
+
+		// get the row
+		var row = $('#pageNotFoundIndex tr:eq(' + index + ')');
+
+		// got details already?
+		if(row.next().hasClass('detailsPane'))
+		{
+			// are they hidden -> show
+			(row.next().css('display') === 'none')
+				? row.next().slideDown()
+				: row.next().slideUp('fast');
+
+			// we're done here
+			return;
+		}
+
+		// get the timestamp
+		var dateString = $('#pageNotFoundDate').text().replace('missing pages:', '');
+
+		// append the year and get the unix timestamp
+		var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
+		date = new Date(dateString + ' ' + year);
+		var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
+
+		// fetch the data
+		$.ajax(
+		{
+			data:
+			{
+				fork: { action: 'fetch_details_data' , module: 'analytics'},
+				index: index,
+				timestamp: timestamp
+			},
+			success: function(json, textStatus)
+			{
+				if(json.code != 200)
+				{
+					// show error if needed
+					if(jsBackend.debug) alert(textStatus);
+				}
+				else
+				{
+					// json.data.data.    browser/browser_version/full_url/language/pageviews/unique_events/referrer
+					var html = '';
+					html += '<div class="detailsPane">';
+					html += '<h3>Page info:</h3>';
+					html += '<p>full-url:' + json.data.data.full_url + '</p>';
+					html += '<p>pageviews:' + json.data.data.pageviews + ' unique events:' + json.data.data.unique_events + '</p>';
+					html += '<h3>Browser info:</h3>';
+					html += '<p>' + json.data.data.browser + ' version ' + json.data.data.browser_version + '</p>';
+					html += '<h3>Language:</h3>';
+					html += '<p>' + json.data.data.language + '</p>';
+					html += '</div>';
+
+					$(html).insertAfter(row).slideDown("slow");
+				}
+			}
+		});
 	},
 
 	// add new chart
