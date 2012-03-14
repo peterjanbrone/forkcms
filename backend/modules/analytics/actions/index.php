@@ -222,7 +222,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 	private function parsePageNotFoundStatistics()
 	{
 		$maxYAxis = 2;
-		$metrics = array('pages');
+		$metrics = array('pageviews');
 		$graphData = array();
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);

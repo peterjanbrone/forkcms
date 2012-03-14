@@ -127,7 +127,7 @@ class BackendAnalyticsModel
 		{
 			$results[$counter] = array();
 			$results[$counter]['timestamp'] = (int)$startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
-			$results[$counter]['pages'] = array();
+			$results[$counter]['pageviews'] = array();
 			$results[$counter]['pages_info'] = array();
 			$counter++;
 		}
@@ -144,7 +144,7 @@ class BackendAnalyticsModel
 		{
 			// init the arrays
 			$filteredData[$index]['timestamp'] = $data[$i]['timestamp'];
-			$filteredData[$index]['pages'] = array();
+			$filteredData[$index]['pageviews'] = array();
 			$filteredData[$index]["pages_info"] = array();
 
 			// collect all data for that day
@@ -171,7 +171,7 @@ class BackendAnalyticsModel
 				}
 
 				// store index and url
-				array_push($filteredData[$index]['pages'], array('index'=> $i + $counter, 'url'=> $url));
+				array_push($filteredData[$index]['pageviews'], array('index'=> $i + $counter, 'url'=> $url));
 
 				// store all other info
 				array_push($filteredData[$index]['pages_info'], array(
@@ -206,7 +206,7 @@ class BackendAnalyticsModel
 				// insert if the dates match
 				if((int)$results[$i]['timestamp'] == (int)$filteredData[$j]['timestamp'])
 				{
-					$results[$i]['pages'] = (array)$filteredData[$j]['pages'];
+					$results[$i]['pageviews'] = (array)$filteredData[$j]['pageviews'];
 					$results[$i]['pages_info'] = (array)$filteredData[$j]['pages_info'];
 				}
 			}

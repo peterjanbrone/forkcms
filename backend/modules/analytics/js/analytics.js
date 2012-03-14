@@ -15,7 +15,7 @@ jsBackend.analytics =
 		$chartDoubleMetricPerDay = $('#chartDoubleMetricPerDay');
 		$chartSingleMetricPerDay = $('#chartSingleMetricPerDay');
 		$chartPageNotFoundStatistics = $('#chartPageNotFoundStatistics');
-		$pageNotFoundStatsWidget = $('#pageNotFoundStatsWidget');
+		$chartWidgetPageNotFoundStatistics = $('#chartWidgetPageNotFoundStatistics');
 
 		jsBackend.analytics.charts.init();
 		jsBackend.analytics.chartDoubleMetricPerDay.init();
@@ -23,7 +23,7 @@ jsBackend.analytics =
 		jsBackend.analytics.chartSingleMetricPerDay.init();
 		jsBackend.analytics.chartWidget.init();
 		jsBackend.analytics.chartPageNotFoundStatistics.init();
-		jsBackend.analytics.pageNotFoundStatsWidget.init();
+		jsBackend.analytics.chartWidgetPageNotFoundStatistics.init();
 		jsBackend.analytics.loading.init();
 		jsBackend.analytics.resize.init();
 	}
@@ -33,7 +33,7 @@ jsBackend.analytics.charts =
 {
 	init: function()
 	{
-		if($chartPieChart.length > 0 || $chartDoubleMetricPerDay.length > 0 || $chartSingleMetricPerDay.length > 0 || $chartWidget.length > 0 || $pageNotFoundStatsWidget.length > 0)
+		if($chartPieChart.length > 0 || $chartDoubleMetricPerDay.length > 0 || $chartSingleMetricPerDay.length > 0 || $chartWidget.length > 0 || $chartWidgetPageNotFoundStatistics.length > 0)
 		{
 			Highcharts.setOptions(
 			{
@@ -373,19 +373,19 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 	}
 }
 
-jsBackend.analytics.pageNotFoundStatsWidget =
+jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 {
 	chart: '',
 
 	init: function()
 	{
-		if($pageNotFoundStatsWidget.length > 0) { jsBackend.analytics.pageNotFoundStatsWidget.create(); }
+		if($chartWidgetPageNotFoundStatistics.length > 0) { jsBackend.analytics.chartWidgetPageNotFoundStatistics.create(); }
 	},
 
 	// add new chart
 	create: function()
 	{
-		var xAxisItems = $('#dataPageNotFoundStatsWidget ul.series li.serie:first-child ul.data li');
+		var xAxisItems = $('#datachartWidgetPageNotFoundStatistics ul.series li.serie:first-child ul.data li');
 		var xAxisValues = [];
 		var xAxisCategories = [];
 		var counter = 0;
@@ -400,17 +400,17 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 			counter++;
 		});
 
-		var metric1Name = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.name').html();
-		var metric1Values = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.value');
+		var metric1Name = $('#datachartWidgetPageNotFoundStatistics ul.series li#metric1serie span.name').html();
+		var metric1Values = $('#datachartWidgetPageNotFoundStatistics ul.series li#metric1serie span.value');
 		var metric1Data = [];
 
 		metric1Values.each(function() { metric1Data.push(parseInt($(this).html())); });
 
-		jsBackend.analytics.pageNotFoundStatsWidget.chart = new Highcharts.Chart(
+		jsBackend.analytics.chartWidgetPageNotFoundStatistics.chart = new Highcharts.Chart(
 		{
-			chart: { renderTo: 'pageNotFoundStatsWidget', defaultSeriesType: 'line', margin: [30, 0, 30, 0], height: 200, width: 270, defaultSeriesType: 'line' },
+			chart: { renderTo: 'chartWidgetPageNotFoundStatistics', defaultSeriesType: 'line', margin: [30, 0, 30, 0], height: 200, width: 270, defaultSeriesType: 'line' },
 			xAxis: { categories: xAxisCategories },
-			yAxis: { min: 0, max: $('#dataPageNotFoundStatsWidget #maxYAxis').html(), tickInterval: ($('#dataPageNotFoundStatsWidget #tickInterval').html() == '' ? null : $('#dataPageNotFoundStatsWidget #tickInterval').html()), title: { enabled : false } },
+			yAxis: { min: 0, max: $('#datachartWidgetPageNotFoundStatistics #maxYAxis').html(), tickInterval: ($('#datachartWidgetPageNotFoundStatistics #tickInterval').html() == '' ? null : $('#datachartWidgetPageNotFoundStatistics #tickInterval').html()), title: { enabled : false } },
 			credits: { enabled: false },
 			legend: { layout: 'horizontal', backgroundColor: 'transparent' },
 			tooltip: { formatter: function() { return '<b>'+ this.series.name +'</b><br/>'+ xAxisValues[this.point.x	] +': '+ this.y; } },
@@ -425,10 +425,10 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 		});
 
 		// refresh the datagrid when clicking on the chartnodes
-		$('#pageNotFoundStatsWidget .highcharts-tracker').click(function() {
+		$('#chartWidgetPageNotFoundStatistics .highcharts-tracker').click(function() {
 
 			// extract the date from the tooltip
-			var tooltipText = $('#pageNotFoundStatsWidget .highcharts-tooltip').text();
+			var tooltipText = $('#chartWidgetPageNotFoundStatistics .highcharts-tooltip').text();
 			var dateString = tooltipText.replace('Pages', '').split(':')[0];
 			
 			// append the year and get the unix timestamp
@@ -491,7 +491,7 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 						$('#pageNotFoundIndex').slideDown('slow', function() {});
 
 						// show details on click
-						$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatsWidget.toggleDetails(e);});
+						$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.chartWidgetPageNotFoundStatistics.toggleDetails(e);});
 
 						// move the spinner back to it's place
 						ajaxSpinner.attr('style', style);
@@ -502,7 +502,7 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 	    });
 
 		// show details, except when the row text is 'none...'
-		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatsWidget.toggleDetails(e);});
+		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.chartWidgetPageNotFoundStatistics.toggleDetails(e);});
 
 	},
 
@@ -585,7 +585,7 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 	// destroy chart
 	destroy: function()
 	{
-		jsBackend.analytics.pageNotFoundStatsWidget.chart.destroy();
+		jsBackend.analytics.chartWidgetPageNotFoundStatistics.chart.destroy();
 	}
 }
 
@@ -741,10 +741,15 @@ jsBackend.analytics.resize =
 				$chartWidget.html('&nbsp;');
 				jsBackend.analytics.chartWidget.create();
 			}
-			if($pageNotFoundStatsWidget.length > 0)
+			if($chartPageNotFoundStatistics > 0)
 			{
-				$pageNotFoundStatsWidget.html('&nbsp;');
-				jsBackend.analytics.pageNotFoundStatsWidget.create();
+				$chartPageNotFoundStatistics.html('&nbsp;');
+				jsBackend.analytics.chartPageNotFoundStatistics.create();
+			}
+			if($chartWidgetPageNotFoundStatistics.length > 0)
+			{
+				$chartWidgetPageNotFoundStatistics.html('&nbsp;');
+				jsBackend.analytics.chartWidgetPageNotFoundStatistics.create();
 			}
 		}
 	}

@@ -41,11 +41,11 @@
 				<div id="pageNotFoundIndex" class="dataGridHolder">
 					<table class="dataGrid">
 						<tbody>
-							{iteration:missingPages.pages}
+							{iteration:missingPages.pageviews}
 							<tr class="{cycle:'even':'odd'}">
-								<td data-index="{$missingPages.pages.index}">{$missingPages.pages.url}</td>
+								<td data-index="{$missingPages.pageviews.index}">{$missingPages.pageviews.url}</td>
 							</tr>
-							{/iteration:missingPages.pages}
+							{/iteration:missingPages.pageviews}
 						</tbody>
 					</table>
 				</div>

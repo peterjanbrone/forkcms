@@ -102,12 +102,11 @@
 
 		#chartPageNotFoundStatistics{
 			float: left;
-			max-width: 660px;
-			width: 59.3%;
+			width: 90%;
+			max-width: 750px;
 		}
 
 		#pageNotFoundStatisticsFilter {
-			display:block;
 			float: right;
 			width: 200px;
 		}
