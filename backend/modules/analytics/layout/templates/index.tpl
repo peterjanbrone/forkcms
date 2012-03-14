@@ -110,6 +110,59 @@
 						</div>
 					</div>
 				</div>
+
+				<div class="analyticsFullWidth">
+					<div class="box boxLevel2">
+						<div class="heading">
+							<h3><a href="{$googleVisitorsURL}">{$lblPageNotFoundStatistics|ucfirst}</a></h3>
+							<div class="buttonHolderRight">
+								<a class="button icon iconGoto linkButton" href="{$googleVisitorsURL}"><span>{$lblViewReport|ucfirst}</span></a>
+							</div>
+						</div>
+						<div class="options">
+							{option:pageNotFoundStatisticsGraphData}
+								<div id="dataChartPageNotFoundStatistics" class="hidden">
+									<span id="chartPageNotFoundStatisticsMaxYAxis">{$chartPageNotFoundStatisticsMaxYAxis}</span>
+									<span id="chartPageNotFoundStatisticsTickInterval">{$chartPageNotFoundStatisticsTickInterval}</span>
+									<span id="chartPageNotFoundStatisticsYAxisTitle">{$lblPageviews|ucfirst}</span>
+									<ul class="series">
+										{iteration:pageNotFoundStatisticsGraphData}
+											<li class="serie" id="metric{$pageNotFoundStatisticsGraphData.i}serie">
+												<span class="name">{$pageNotFoundStatisticsGraphData.label}</span>
+												<ul class="data">
+													{iteration:pageNotFoundStatisticsGraphData.data}
+														<li>
+															<span class="fulldate">{$pageNotFoundStatisticsGraphData.data.date|date:'D d M':{$INTERFACE_LANGUAGE}|ucwords}</span>
+															<span class="date">{$pageNotFoundStatisticsGraphData.data.date|date:'d M':{$INTERFACE_LANGUAGE}|ucwords}</span>
+															<span class="value">{$pageNotFoundStatisticsGraphData.data.value}</span>
+														</li>
+													{/iteration:pageNotFoundStatisticsGraphData.data}
+												</ul>
+											</li>
+										{/iteration:pageNotFoundStatisticsGraphData}
+									</ul>
+								</div>
+
+								<div id="chartPageNotFoundStatistics">&nbsp;</div>
+
+								<div id="pageNotFoundStatisticsFilter">
+									<h4>Filter:</h4>
+									<p>user logged in:<p>
+									<input type=checkbox NAME="user_logged_in" />
+
+									<p>caller is module action:<p>
+									<input type=checkbox NAME="caller_is_module_action" />
+
+									<p>extension<p>
+									<input type=text NAME="extension"/>
+								</div>
+							{/option:pageNotFoundStatisticsGraphData}
+							<div id="highChartsLink" class="buttonHolderRight">
+								<a href="http://highcharts.com/" class="analyticsBacklink">Highcharts</a>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

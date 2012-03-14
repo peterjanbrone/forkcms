@@ -12,15 +12,17 @@ jsBackend.analytics =
 		// variables
 		$chartPieChart = $('#chartPieChart');
 		$chartWidget = $('#chartWidget');
-		$pageNotFoundStatsWidget = $('#pageNotFoundStatsWidget');
 		$chartDoubleMetricPerDay = $('#chartDoubleMetricPerDay');
 		$chartSingleMetricPerDay = $('#chartSingleMetricPerDay');
+		$chartPageNotFoundStatistics = $('#chartPageNotFoundStatistics');
+		$pageNotFoundStatsWidget = $('#pageNotFoundStatsWidget');
 
 		jsBackend.analytics.charts.init();
 		jsBackend.analytics.chartDoubleMetricPerDay.init();
 		jsBackend.analytics.chartPieChart.init();
 		jsBackend.analytics.chartSingleMetricPerDay.init();
 		jsBackend.analytics.chartWidget.init();
+		jsBackend.analytics.chartPageNotFoundStatistics.init();
 		jsBackend.analytics.pageNotFoundStatsWidget.init();
 		jsBackend.analytics.loading.init();
 		jsBackend.analytics.resize.init();
@@ -313,6 +315,64 @@ jsBackend.analytics.chartWidget =
 	}
 }
 
+jsBackend.analytics.chartPageNotFoundStatistics =
+{
+	chart: '',
+
+	init: function()
+	{
+		if($chartPageNotFoundStatistics.length > 0) { jsBackend.analytics.chartPageNotFoundStatistics.create(); }
+	},
+
+	create: function()
+	{
+		var xAxisItems = $('#dataChartPageNotFoundStatistics ul.series li.serie:first-child ul.data li');
+		var xAxisValues = [];
+		var xAxisCategories = [];
+		var counter = 0;
+		var interval = Math.ceil(xAxisItems.length / 10);
+
+		xAxisItems.each(function()
+		{
+			xAxisValues.push($(this).children('span.fulldate').html());
+			var text = $(this).children('span.date').html();
+			if(xAxisItems.length > 10 && counter%interval > 0) text = ' ';
+			xAxisCategories.push(text);
+			counter++;
+		});
+
+		var metric1Name = $('#dataChartPageNotFoundStatistics ul.series li#metric1serie span.name').html();
+		var metric1Values = $('#dataChartPageNotFoundStatistics ul.series li#metric1serie span.value');
+		var metric1Data = [];
+
+		metric1Values.each(function() { metric1Data.push(parseInt($(this).html())); });
+
+		var containerWidth = $('#chartPageNotFoundStatistics').width();
+
+		jsBackend.analytics.chartPageNotFoundStatistics.chart = new Highcharts.Chart(
+		{
+			chart: { renderTo: 'chartPageNotFoundStatistics', height: 200, width: containerWidth, margin: [60, 0, 30, 40], defaultSeriesType: 'line' },
+			xAxis: { lineColor: '#CCC', lineWidth: 1, categories: xAxisCategories, color: '#000' },
+			yAxis: { min: 0, max: $('#dataChartPageNotFoundStatistics #chartPageNotFoundStatisticsMaxYAxis').html(), tickInterval: ($('#dataChartPageNotFoundStatistics #chartPageNotFoundStatisticsTickInterval').html() == '' ? null : $('#dataChartPageNotFoundStatistics #chartPageNotFoundStatisticsTickInterval').html()), title: { text: '' } },
+			credits: { enabled: false },
+			tooltip: { formatter: function() { return '<b>'+ this.series.name +'</b><br/>'+ xAxisValues[this.point.x] +': '+ this.y; } },
+			plotOptions:
+			{
+				line: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 5, lineWidth: 1 } } } },
+				area: {	marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 5, lineWidth: 1 } } } },
+				column: { pointPadding: 0.2, borderWidth: 0 },
+				series: { fillOpacity: 0.3 }
+			},
+			series: [{name: metric1Name, data: metric1Data, type: 'area' }]
+		});
+	},
+
+	destroy: function()
+	{
+		jsBackend.analytics.chartPageNotFoundStatistics.chart.destroy();
+	}
+}
+
 jsBackend.analytics.pageNotFoundStatsWidget =
 {
 	chart: '',
@@ -320,6 +380,49 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 	init: function()
 	{
 		if($pageNotFoundStatsWidget.length > 0) { jsBackend.analytics.pageNotFoundStatsWidget.create(); }
+	},
+
+	// add new chart
+	create: function()
+	{
+		var xAxisItems = $('#dataPageNotFoundStatsWidget ul.series li.serie:first-child ul.data li');
+		var xAxisValues = [];
+		var xAxisCategories = [];
+		var counter = 0;
+		var interval = Math.ceil(xAxisItems.length / 10);
+
+		xAxisItems.each(function()
+		{
+			xAxisValues.push($(this).children('span.fulldate').html());
+			var text = $(this).children('span.date').html();
+			if(xAxisItems.length > 10 && counter%interval > 0) text = ' ';
+			xAxisCategories.push(text);
+			counter++;
+		});
+
+		var metric1Name = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.name').html();
+		var metric1Values = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.value');
+		var metric1Data = [];
+
+		metric1Values.each(function() { metric1Data.push(parseInt($(this).html())); });
+
+		jsBackend.analytics.pageNotFoundStatsWidget.chart = new Highcharts.Chart(
+		{
+			chart: { renderTo: 'pageNotFoundStatsWidget', defaultSeriesType: 'line', margin: [30, 0, 30, 0], height: 200, width: 270, defaultSeriesType: 'line' },
+			xAxis: { categories: xAxisCategories },
+			yAxis: { min: 0, max: $('#dataPageNotFoundStatsWidget #maxYAxis').html(), tickInterval: ($('#dataPageNotFoundStatsWidget #tickInterval').html() == '' ? null : $('#dataPageNotFoundStatsWidget #tickInterval').html()), title: { enabled : false } },
+			credits: { enabled: false },
+			legend: { layout: 'horizontal', backgroundColor: 'transparent' },
+			tooltip: { formatter: function() { return '<b>'+ this.series.name +'</b><br/>'+ xAxisValues[this.point.x	] +': '+ this.y; } },
+			plotOptions:
+			{
+				line: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 6, lineWidth: 1 } } } },
+				area: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 6, lineWidth: 1 } } } },
+				column: { pointPadding: 0.2, borderWidth: 0 },
+				series: { fillOpacity: 0.2 }
+			},
+			series: [ { name: metric1Name, data: metric1Data, type: 'area' }]
+		});
 
 		// refresh the datagrid when clicking on the chartnodes
 		$('#pageNotFoundStatsWidget .highcharts-tracker').click(function() {
@@ -476,49 +579,6 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 					ajaxSpinner.insertAfter('#messaging');
 				}
 			}
-		});
-	},
-
-	// add new chart
-	create: function()
-	{
-		var xAxisItems = $('#dataPageNotFoundStatsWidget ul.series li.serie:first-child ul.data li');
-		var xAxisValues = [];
-		var xAxisCategories = [];
-		var counter = 0;
-		var interval = Math.ceil(xAxisItems.length / 10);
-
-		xAxisItems.each(function()
-		{
-			xAxisValues.push($(this).children('span.fulldate').html());
-			var text = $(this).children('span.date').html();
-			if(xAxisItems.length > 10 && counter%interval > 0) text = ' ';
-			xAxisCategories.push(text);
-			counter++;
-		});
-
-		var metric1Name = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.name').html();
-		var metric1Values = $('#dataPageNotFoundStatsWidget ul.series li#metric1serie span.value');
-		var metric1Data = [];
-
-		metric1Values.each(function() { metric1Data.push(parseInt($(this).html())); });
-
-		jsBackend.analytics.pageNotFoundStatsWidget.chart = new Highcharts.Chart(
-		{
-			chart: { renderTo: 'pageNotFoundStatsWidget', defaultSeriesType: 'line', margin: [30, 0, 30, 0], height: 200, width: 270, defaultSeriesType: 'line' },
-			xAxis: { categories: xAxisCategories },
-			yAxis: { min: 0, max: $('#dataPageNotFoundStatsWidget #maxYAxis').html(), tickInterval: ($('#dataPageNotFoundStatsWidget #tickInterval').html() == '' ? null : $('#dataPageNotFoundStatsWidget #tickInterval').html()), title: { enabled : false } },
-			credits: { enabled: false },
-			legend: { layout: 'horizontal', backgroundColor: 'transparent' },
-			tooltip: { formatter: function() { return '<b>'+ this.series.name +'</b><br/>'+ xAxisValues[this.point.x	] +': '+ this.y; } },
-			plotOptions:
-			{
-				line: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 5, lineWidth: 1 } } } },
-				area: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 5, lineWidth: 1 } } } },
-				column: { pointPadding: 0.2, borderWidth: 0 },
-				series: { fillOpacity: 0.2 }
-			},
-			series: [ { name: metric1Name, data: metric1Data, type: 'area' }]
 		});
 	},
 

@@ -95,6 +95,28 @@
 			font-size: 11px;
 		}
 
+	.analyticsFullWidth {
+		clear:both;
+		padding-top: 12px;
+	}
+
+		#chartPageNotFoundStatistics{
+			float: left;
+			max-width: 660px;
+			width: 59.3%;
+		}
+
+		#pageNotFoundStatisticsFilter {
+			display:block;
+			float: right;
+			width: 200px;
+		}
+
+		#highChartsLink {
+			clear: both;
+		}
+
+
 /* DataGrid holders */
 
 #analyticsDataGridLeftCol {

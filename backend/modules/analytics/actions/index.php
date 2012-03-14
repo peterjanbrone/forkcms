@@ -40,6 +40,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 			$this->parseOverviewData();
 			$this->parseLineChartData();
 			$this->parsePieChartData();
+			$this->parsePageNotFoundStatistics();
 			$this->parseImportantReferrals();
 			$this->parseImportantKeywords();
 
@@ -213,6 +214,63 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 			$this->tpl->assign('bouncesTotal', $bouncesTotal);
 			$this->tpl->assign('bouncesDifference', $bouncesDifference);
 		}
+	}
+
+	/**
+	 * Parses the page not found statistics data
+	 */
+	private function parsePageNotFoundStatistics()
+	{
+		$maxYAxis = 2;
+		$metrics = array('pages');
+		$graphData = array();
+		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
+		$endTimestamp = mktime(0, 0, 0);
+
+		// get the data
+		$statistics = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp, true);
+
+		// there are some metrics
+		if($statistics !== false)
+		{
+			// make the data highchart usable
+			$statistics = BackendAnalyticsModel::filterData($statistics);
+
+			// loop metrics
+			foreach($metrics as $i => $metric)
+			{
+				// build graph data array
+				$graphData[$i] = array();
+				$graphData[$i]['title'] = $metric;
+				$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
+				$graphData[$i]['i'] = $i + 1;
+				$graphData[$i]['data'] = array();
+
+				// loop metrics per day
+				foreach($statistics as $j => $data)
+				{
+					// cast SimpleXMLElement to array
+					$data = (array) $data;
+
+					// build array
+					$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
+					$graphData[$i]['data'][$j]['value'] = (string) count($data[$metric]);
+				}
+			}
+		}
+
+		foreach($graphData as $metric)
+		{
+			foreach($metric['data'] as $data)
+			{
+				// get the maximum value
+				if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
+			}
+		}
+
+		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
+		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
+		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
 	}
 
 	/**
