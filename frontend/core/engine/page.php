@@ -101,7 +101,9 @@ class FrontendPage extends FrontendBaseObject
 			: new FrontendBreadcrumb();
 
 		// create header instance
-		$this->header = new FrontendHeader();
+		$this->header = ($this->pageId === 404)
+			? new FrontendHeader(404)
+			: new FrontendHeader();
 
 		// new footer instance
 		$this->footer = new FrontendFooter();

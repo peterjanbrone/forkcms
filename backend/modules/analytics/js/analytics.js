@@ -423,6 +423,13 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 			return;
 		}
 
+		// move the spinner !
+		var ajaxSpinner = $('#ajaxSpinner');
+		var style = ajaxSpinner.attr('style');
+		ajaxSpinner.remove();
+		ajaxSpinner.insertAfter('#pageNotFoundDate');
+		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
+
 		// get the timestamp
 		var dateString = $('#pageNotFoundDate').text().replace('missing pages:', '');
 
@@ -449,11 +456,11 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 				}
 				else
 				{
-					// json.data.data.    browser/browser_version/full_url/language/pageviews/unique_events/referrer
+					// build the html
 					var html = '';
 					html += '<div class="detailsPane">';
 					html += '<h3>Page info:</h3>';
-					html += '<p>full-url:' + json.data.data.full_url + '</p>';
+					html += '<p>full-url: ' + json.data.data.full_url + '</p>';
 					html += '<p>pageviews:' + json.data.data.pageviews + ' unique events:' + json.data.data.unique_events + '</p>';
 					html += '<h3>Browser info:</h3>';
 					html += '<p>' + json.data.data.browser + ' version ' + json.data.data.browser_version + '</p>';
@@ -461,7 +468,12 @@ jsBackend.analytics.pageNotFoundStatsWidget =
 					html += '<p>' + json.data.data.language + '</p>';
 					html += '</div>';
 
+					// insert the details
 					$(html).insertAfter(row).slideDown("slow");
+
+					// move the spinner back to it's place
+					ajaxSpinner.attr('style', style);
+					ajaxSpinner.insertAfter('#messaging');
 				}
 			}
 		});

@@ -86,32 +86,6 @@ class FrontendPagesModel implements FrontendTagsInterface
 	}
 
 	/**
-	 * Saves all 404 page statistics
-	 *
-	 * @param array $stats
-	 */
-	 public static function insertPageNotFoundStats($item)
-	 {
-	 	// split the data into two tables
-	 	$pageData = array();
-	 	$visitorData = array();
-
-	 	// fill the first table
-	 	$pageData['page'] = $item['page'];
-	 	$pageData['referrer'] = $item['referrer'];
-	 	$pageData['date'] = $item['date'];
-
-	 	// get the id from the first one and fill the visitor table
-	 	$visitorData['error_page_id'] = (int) FrontendModel::getDB(true)->insert('analytics_error_pages', $pageData);
-	 	$visitorData['ip'] = $item['remote_ip'];
-	 	$visitorData['browser'] = $item['browser'];
-	 	$visitorData['extension'] = $item['extension'];
-	 	$visitorData['is_logged_in'] = $item['is_logged_in'];
-	 	$visitorData['caller_is_module'] = $item['caller_is_module'];
-		FrontendModel::getDB(true)->insert('analytics_error_page_visitors', $visitorData);
-	 }
-
-	/**
 	 * Parse the search results for this module
 	 *
 	 * Note: a module's search function should always:

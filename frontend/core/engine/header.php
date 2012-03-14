@@ -65,7 +65,14 @@ class FrontendHeader extends FrontendBaseObject
 	 */
 	private $pageTitle;
 
-	public function __construct()
+	/**
+	 * The current pageId
+	 *
+	 * @var	int
+	 */
+	private $pageId;
+
+	public function __construct($pageId = null)
 	{
 		parent::__construct();
 
@@ -85,6 +92,9 @@ class FrontendHeader extends FrontendBaseObject
 		$this->addJS('/frontend/core/js/jquery/jquery.frontend.js', true);
 		$this->addJS('/frontend/core/js/utils.js', true);
 		$this->addJS('/frontend/core/js/frontend.js', false, true);
+
+		// store page id
+		if($pageId !== null) $this->pageId = (int)$pageId;
 	}
 
 	/**
@@ -591,19 +601,64 @@ class FrontendHeader extends FrontendBaseObject
 		// search for the webpropertyId in the header and footer, if not found we should build the GA-code
 		if($webPropertyId != '' && strpos($siteHTMLHeader, $webPropertyId) === false && strpos($siteHTMLFooter, $webPropertyId) === false)
 		{
-			// build GA-tracking code
-			$trackingCode = '<script type="text/javascript">
-								var _gaq = _gaq || [];
-								_gaq.push([\'_setAccount\',\'' . $webPropertyId . '\']);
-								_gaq.push([\'_setDomainName\', \'none\']);
-								_gaq.push([\'_trackPageview\']);
+			// build GA-tracking code for a 404 page
+			if($this->pageId !== null)
+			{
+				// collect some statistics:
 
-								(function() {
-								    var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
-								    ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
-									var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
-								})();
-							</script>';
+				// get the extension
+				$queryStringChunks = explode(".", Spoon::get('url')->getQueryString());
+				$extension = (count($queryStringChunks) > 1)? end($queryStringChunks) : null;
+
+				// 404 because of action ? or just complete inexisting page
+				$callerIsModuleAction = false;
+				$backtrace = debug_backtrace();
+				foreach($backtrace as $i => $trace)
+				{
+					if($trace['function'] === 'dieWith404')
+						if($backtrace[--$i]['class'] === 'FrontendPage') $callerIsModuleAction = true;
+				}
+
+				// user logged in?
+				$isLoggedIn = FrontendProfilesAuthentication::isLoggedIn();
+
+				$trackingCode = '<script type="text/javascript">
+									var _gaq = _gaq || [];
+									_gaq.push([\'_setAccount\',\'' . $webPropertyId . '\']);
+									_gaq.push([\'_setAllowLinker\', true]);
+									_gaq.push([\'_setDomainName\', \'none\']);
+									_gaq.push([\'_trackPageview\']);
+
+									_gaq.push([\'_setCustomVar\', 1, \'extension\', \'' . $extension . '\']);
+									_gaq.push([\'_setCustomVar\', 2, \'isLoggedIn\', \'' . $isLoggedIn . '\']);
+									_gaq.push([\'_setCustomVar\', 3, \'callerIsAction\', \'' . $callerIsModuleAction . '\']);
+
+									_gaq.push([\'_trackEvent\', \'404\', encodeURIComponent(document.location.pathname)
+									+ encodeURIComponent(document.location.search), encodeURIComponent(document.referrer)]);
+
+									(function() {
+										var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
+										ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
+										var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
+									})();
+								</script>';
+			}
+			// build GA-tracking code
+			else
+			{
+				$trackingCode = '<script type="text/javascript">
+									var _gaq = _gaq || [];
+									_gaq.push([\'_setAccount\',\'' . $webPropertyId . '\']);
+									_gaq.push([\'_setDomainName\', \'none\']);
+									_gaq.push([\'_trackPageview\']);
+
+									(function() {
+									    var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
+									    ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
+										var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
+									})();
+								</script>';
+			}
 
 			// add to the header
 			$siteHTMLHeader .= "\n" . $trackingCode;
