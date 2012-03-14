@@ -124,7 +124,7 @@ class BackendAnalyticsHelper
 		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
 
 		// get dimensions
-		$dimensions = array('eventAction', 'browser', 'browserVersion', 'language', 'date', 'referralPath');
+		$dimensions = array('pagePath', 'referralPath', 'browser', 'browserVersion', 'language', 'date');
 		$gaDimensions = array();
 		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
 

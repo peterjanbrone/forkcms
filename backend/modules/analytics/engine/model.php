@@ -152,7 +152,7 @@ class BackendAnalyticsModel
 			while($data[$i + $counter]['timestamp'] === $timestamp)
 			{
 				// get the missing page url
-				$url = urldecode((string)$data[$i + $counter]['eventAction']);
+				$url = $data[$i + $counter]['pagePath'];
 
 				// too long to display?
 				if(strlen($url) > 40)
@@ -175,7 +175,7 @@ class BackendAnalyticsModel
 
 				// store all other info
 				array_push($filteredData[$index]['pages_info'], array(
-						'full_url'=> urldecode((string)$data[$i + $counter]['eventAction']),
+						'full_url'=> $data[$i + $counter]['pagePath'],
 						'unique_events'=> $data[$i + $counter]['uniqueEvents'],
 						'pageviews'=> $data[$i + $counter]['pageviews'],
 						'browser'=> $data[$i + $counter]['browser'],

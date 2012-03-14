@@ -32,6 +32,25 @@
 				</ul>
 			</div>
 			<div id="pageNotFoundStatsWidget">&nbsp;</div>
+
+			<div class="boxLevel2">
+				<div class=" heading">
+					<h3 id="pageNotFoundDate">{$pageNotFoundDate}</h3>
+				</div>
+				{option:missingPages}
+				<div id="pageNotFoundIndex" class="dataGridHolder">
+					<table class="dataGrid">
+						<tbody>
+							{iteration:missingPages.pages}
+							<tr class="{cycle:'even':'odd'}">
+								<td data-index="{$missingPages.pages.index}">{$missingPages.pages.url}</td>
+							</tr>
+							{/iteration:missingPages.pages}
+						</tbody>
+					</table>
+				</div>
+				{/option:missingPages}
+			</div>
 		{/option:analyticsPageNotFoundStatsGraphData}
 
 		{option:!analyticsPageNotFoundStatsGraphData}
@@ -41,24 +60,10 @@
 				</a>
 			</p>
 		{/option:!analyticsPageNotFoundStatsGraphData}
-
-		<div class="boxLevel2">
-			<div class=" heading">
-				<h3 id="pageNotFoundDate">{$pageNotFoundDate}</h3>
-			</div>
-			{option:missingPages}
-			<div id="pageNotFoundIndex" class="dataGridHolder">
-				<table class="dataGrid">
-					<tbody>
-						{iteration:missingPages.pages}
-						<tr class="{cycle:'even':'odd'}">
-							<td data-index="{$missingPages.pages.index}">{$missingPages.pages.url}</td>
-						</tr>
-						{/iteration:missingPages.pages}
-					</tbody>
-				</table>
-			</div>
-			{/option:missingPages}
+	</div>
+	<div class="footer">
+		<div class="buttonHolderRight">
+			<a href="{$var|geturl:'index':'analytics'}" class="button"><span>{$lblAllStatistics|ucfirst}</span></a>
 		</div>
 	</div>
 </div>

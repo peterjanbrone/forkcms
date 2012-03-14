@@ -601,64 +601,47 @@ class FrontendHeader extends FrontendBaseObject
 		// search for the webpropertyId in the header and footer, if not found we should build the GA-code
 		if($webPropertyId != '' && strpos($siteHTMLHeader, $webPropertyId) === false && strpos($siteHTMLFooter, $webPropertyId) === false)
 		{
-			// build GA-tracking code for a 404 page
+			// page not found? collect extra stats
+			$extraCode = '';
 			if($this->pageId !== null)
 			{
-				// collect some statistics:
-
 				// get the extension
 				$queryStringChunks = explode(".", Spoon::get('url')->getQueryString());
-				$extension = (count($queryStringChunks) > 1)? end($queryStringChunks) : null;
+				$extension = (count($queryStringChunks) > 1)? end($queryStringChunks) : 'php';
 
-				// 404 because of action ? or just complete inexisting page
-				$callerIsModuleAction = false;
+				// 404 because of action ? or a completely inexisting page
+				$callerIsModuleAction = 'no';
 				$backtrace = debug_backtrace();
 				foreach($backtrace as $i => $trace)
 				{
 					if($trace['function'] === 'dieWith404')
-						if($backtrace[--$i]['class'] === 'FrontendPage') $callerIsModuleAction = true;
+						if($backtrace[--$i]['class'] === 'FrontendPage') $callerIsModuleAction = 'yes';
 				}
 
 				// user logged in?
-				$isLoggedIn = FrontendProfilesAuthentication::isLoggedIn();
+				$isLoggedIn = (FrontendProfilesAuthentication::isLoggedIn())? 'yes' : 'no';
 
-				$trackingCode = '<script type="text/javascript">
-									var _gaq = _gaq || [];
-									_gaq.push([\'_setAccount\',\'' . $webPropertyId . '\']);
-									_gaq.push([\'_setAllowLinker\', true]);
-									_gaq.push([\'_setDomainName\', \'none\']);
-									_gaq.push([\'_trackPageview\']);
-
-									_gaq.push([\'_setCustomVar\', 1, \'extension\', \'' . $extension . '\']);
-									_gaq.push([\'_setCustomVar\', 2, \'isLoggedIn\', \'' . $isLoggedIn . '\']);
-									_gaq.push([\'_setCustomVar\', 3, \'callerIsAction\', \'' . $callerIsModuleAction . '\']);
-
-									_gaq.push([\'_trackEvent\', \'404\', encodeURIComponent(document.location.pathname)
-									+ encodeURIComponent(document.location.search), encodeURIComponent(document.referrer)]);
-
-									(function() {
-										var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
-										ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
-										var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
-									})();
-								</script>';
+				// insert as extra code
+				$extraCode = '_gaq.push([\'_setCustomVar\', 1, \'extension\', \'' . $extension . '\']);
+								_gaq.push([\'_setCustomVar\', 2, \'isLoggedIn\', \'' . $isLoggedIn . '\']);
+								_gaq.push([\'_setCustomVar\', 3, \'callerIsAction\', \'' . $callerIsModuleAction . '\']);';
 			}
+
 			// build GA-tracking code
-			else
-			{
-				$trackingCode = '<script type="text/javascript">
-									var _gaq = _gaq || [];
-									_gaq.push([\'_setAccount\',\'' . $webPropertyId . '\']);
-									_gaq.push([\'_setDomainName\', \'none\']);
-									_gaq.push([\'_trackPageview\']);
+			$trackingCode = '<script type="text/javascript">
+								var _gaq = _gaq || [];
+								_gaq.push([\'_setAccount\',\'' . $webPropertyId . '\']);
+								_gaq.push([\'_setDomainName\', \'none\']);
+								_gaq.push([\'_trackPageview\']);
 
-									(function() {
-									    var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
-									    ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
-										var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
-									})();
-								</script>';
-			}
+								' . $extraCode . '
+
+								(function() {
+									var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;
+									ga.src = (\'https:\' == document.location.protocol ? \'https://ssl\' : \'http://www\') + \'.google-analytics.com/ga.js\';
+									var s = document.getElementsByTagName(\'script\')[0]; s.parentNode.insertBefore(ga, s);
+								})();
+							</script>';
 
 			// add to the header
 			$siteHTMLHeader .= "\n" . $trackingCode;
