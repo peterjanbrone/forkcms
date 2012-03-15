@@ -148,13 +148,56 @@
 								<div id="pageNotFoundStatisticsFilter">
 									<h4>Filter:</h4>
 									<p>user logged in:<p>
-									<input type=checkbox NAME="user_logged_in" />
+									<input type=checkbox name="user_logged_in" id="isLoggedIn"/>
 
 									<p>caller is module action:<p>
-									<input type=checkbox NAME="caller_is_module_action" />
+									<input type=checkbox name="caller_is_action" id="callerIsAction"/>
 
+									{option:filterExtension}
 									<p>extension<p>
-									<input type=text NAME="extension"/>
+									<select id="extension">
+										{iteration:filterBrowserVersion}
+										<option>{$filterBrowserVersion.versionId}</option>
+										{/iteration:filterBrowserVersion}
+									</select>
+									{/option:filterExtension}
+
+									{option:filterBrowser}
+									<p>browser<p>
+									<select id="browser">
+										{iteration:filterBrowser}
+										<option>{$filterBrowser.name}</option>
+										{/iteration:filterBrowser}
+									</select>
+									{/option:filterBrowser}
+
+									{option:filterBrowserVersion}
+									<p>version<p>
+									<select id="browserVersion">
+										{iteration:filterBrowserVersion}
+										<option>{$filterBrowserVersion.versionId}</option>
+										{/iteration:filterBrowserVersion}
+									</select>
+									{/option:filterBrowserVersion}
+								</div>
+
+								<div id="dataGridPageNotFoundStatistics" class="boxLevel2">
+									<div class=" heading">
+										<h3 id="pageNotFoundDate">{$pageNotFoundDate}</h3>
+									</div>
+									{option:missingPages}
+									<div id="pageNotFoundIndex" class="dataGridHolder">
+										<table class="dataGrid">
+											<tbody>
+												{iteration:missingPages.pageviews}
+												<tr class="{cycle:'even':'odd'}">
+													<td data-index="{$missingPages.pageviews.index}">{$missingPages.pageviews.url}</td>
+												</tr>
+												{/iteration:missingPages.pageviews}
+											</tbody>
+										</table>
+									</div>
+									{/option:missingPages}
 								</div>
 							{/option:pageNotFoundStatisticsGraphData}
 							<div id="highChartsLink" class="buttonHolderRight">

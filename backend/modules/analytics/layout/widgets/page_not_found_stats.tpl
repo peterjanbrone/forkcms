@@ -10,7 +10,7 @@
 
 	<div class="options content">
 		{option:analyticsPageNotFoundStatsGraphData}
-			<div id="dataPageNotFoundStatsWidget" class="hidden">
+			<div id="dataChartPageNotFoundStatistics" class="hidden">
 				<span id="maxYAxis">{$analyticsPageNotFoundStatsMaxYAxis}</span>
 				<span id="tickInterval">{$analyticsPageNotFoundStatsTickInterval}</span>
 				<span id="yAxisTitle">{$lblPageviews|ucfirst}</span>
@@ -31,9 +31,9 @@
 					{/iteration:analyticsPageNotFoundStatsGraphData}
 				</ul>
 			</div>
-			<div id="pageNotFoundStatsWidget">&nbsp;</div>
+			<div id="chartPageNotFoundStatistics">&nbsp;</div>
 
-			<div class="boxLevel2">
+			<div id="dataGridPageNotFoundStatistics" class="boxLevel2">
 				<div class=" heading">
 					<h3 id="pageNotFoundDate">{$pageNotFoundDate}</h3>
 				</div>

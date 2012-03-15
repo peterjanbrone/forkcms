@@ -100,22 +100,6 @@
 		padding-top: 12px;
 	}
 
-		#chartPageNotFoundStatistics{
-			float: left;
-			width: 90%;
-			max-width: 750px;
-		}
-
-		#pageNotFoundStatisticsFilter {
-			float: right;
-			width: 200px;
-		}
-
-		#highChartsLink {
-			clear: both;
-		}
-
-
 /* DataGrid holders */
 
 #analyticsDataGridLeftCol {
@@ -146,6 +130,31 @@
 
 #periodPickerForm input.inputText {
 	width: 140px;
+}
+
+/* Page Not Found Statistics */
+
+#chartPageNotFoundStatistics {
+	float: left;
+	width: 70%;
+	max-width: 750px;
+}
+
+#dataGridPageNotFoundStatistics {
+	clear: both;
+}
+
+#pageNotFoundStatisticsFilter {
+	float: right;
+	width: 200px;
+}
+
+#pageNotFoundStatisticsFilter p {
+	float: left;
+}
+
+#highChartsLink {
+	clear: both;
 }
 
 /* Settings page */

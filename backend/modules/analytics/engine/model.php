@@ -83,38 +83,12 @@ class BackendAnalyticsModel
 	}
 
 	/**
-	 * Delete one or more landing pages
-	 *
-	 * @param mixed $ids The ids to delete.
-	 */
-	public static function deleteLandingPage($ids)
-	{
-		BackendModel::getDB(true)->delete('analytics_landing_pages', 'id IN (' . implode(',', (array) $ids) . ')');
-	}
-
-	/**
-	 * Checks if a landing page exists
-	 *
-	 * @param int $id The id of the landing page to check for existence.
-	 * @return bool
-	 */
-	public static function existsLandingPage($id)
-	{
-		return (bool) BackendModel::getDB()->getVar(
-			'SELECT COUNT(id)
-			 FROM analytics_landing_pages
-			 WHERE id = ?',
-			array((int) $id)
-		);
-	}
-
-	/**
-	 * Filter dashboardata for highchart use
+	 * Filters dashboardata for highchart use
 	 *
 	 * @param array data
 	 * @return array
 	 */
-	public static function filterData($data)
+	public static function convertForHighchart($data)
 	{
 		// we need stats for 9 days so first build that empty array
 		$results = array();
@@ -213,6 +187,32 @@ class BackendAnalyticsModel
 		}
 
 		return $results;
+	}
+
+	/**
+	 * Delete one or more landing pages
+	 *
+	 * @param mixed $ids The ids to delete.
+	 */
+	public static function deleteLandingPage($ids)
+	{
+		BackendModel::getDB(true)->delete('analytics_landing_pages', 'id IN (' . implode(',', (array) $ids) . ')');
+	}
+
+	/**
+	 * Checks if a landing page exists
+	 *
+	 * @param int $id The id of the landing page to check for existence.
+	 * @return bool
+	 */
+	public static function existsLandingPage($id)
+	{
+		return (bool) BackendModel::getDB()->getVar(
+			'SELECT COUNT(id)
+			 FROM analytics_landing_pages
+			 WHERE id = ?',
+			array((int) $id)
+		);
 	}
 
 	/**

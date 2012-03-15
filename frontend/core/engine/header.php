@@ -632,9 +632,8 @@ class FrontendHeader extends FrontendBaseObject
 								var _gaq = _gaq || [];
 								_gaq.push([\'_setAccount\',\'' . $webPropertyId . '\']);
 								_gaq.push([\'_setDomainName\', \'none\']);
-								_gaq.push([\'_trackPageview\']);
-
 								' . $extraCode . '
+								_gaq.push([\'_trackPageview\']);
 
 								(function() {
 									var ga = document.createElement(\'script\'); ga.type = \'text/javascript\'; ga.async = true;

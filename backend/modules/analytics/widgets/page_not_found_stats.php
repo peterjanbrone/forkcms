@@ -60,7 +60,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		if($dashboardData !== false)
 		{
 			// make the data highchart usable
-			$dashboardData = BackendAnalyticsModel::filterData($dashboardData);
+			$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData);
 
 			// loop metrics
 			foreach($metrics as $i => $metric)
@@ -102,12 +102,6 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 
 		// assign the date
 		$this->tpl->assign('pageNotFoundDate', date("D j M", (int)$dashboardData[0]['timestamp']) . ' missing pages:');
-
-		// no missing pages? insert a message
-		if(count($dashboardData[0]['pageviews']) === 0)
-		{
-			$dashboardData[0]['pageviews'][0] = array('url' => 'none...');
-		}
 
 		// assign first day data
 		$this->tpl->assign('missingPages', $dashboardData[0]);

@@ -234,7 +234,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		if($statistics !== false)
 		{
 			// make the data highchart usable
-			$statistics = BackendAnalyticsModel::filterData($statistics);
+			$statistics = BackendAnalyticsModel::convertForHighchart($statistics);
 
 			// loop metrics
 			foreach($metrics as $i => $metric)
@@ -257,20 +257,64 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 					$graphData[$i]['data'][$j]['value'] = (string) count($data[$metric]);
 				}
 			}
-		}
 
-		foreach($graphData as $metric)
-		{
-			foreach($metric['data'] as $data)
+			// get the maximum value
+			foreach($graphData as $metric)
 			{
-				// get the maximum value
-				if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
+				foreach($metric['data'] as $data)
+				{
+					if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
+				}
+			}
+
+			// get filter data
+			$browsers = array();
+			$extensions = array();
+			foreach($statistics as $stat)
+			{
+				foreach($stat['pages_info'] as $page)
+				{
+					// get all browsers
+					if(!in_array($page['browser'], $browsers))
+						$browsers[$page['browser']] = array('name' => $page['browser'], 'versions' => array());
+
+					// get all versions of each browser
+					if(!in_array($page['browser_version'], $browsers[$page['browser']]['versions']))
+						array_push($browsers[$page['browser']]['versions'], $page['browser_version']);
+
+					// get all extensions
+					// @TODO add extension funct.
+				}
+			}
+
+			// make it datagrid usable
+			$filterBrowser = array(array('name' => '-'));
+			$filterBrowserVersion = array(array('versionId' => '-'));
+			foreach($browsers as $browser)
+			{
+				array_push($filterBrowser, array('name' => $browser['name']));
+
+				foreach($browser['versions'] as $version)
+				{
+					array_push($filterBrowserVersion, array('versionId' => $version));
+				}
 			}
 		}
 
 		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
 		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
 		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
+
+		// assign the date
+		$this->tpl->assign('pageNotFoundDate', date("D j M", (int)$statistics[0]['timestamp']) . ' missing pages:');
+
+		// assign the datagrid data
+		$this->tpl->assign('missingPages', $statistics[0]);
+
+		// assign the filter data
+		$this->tpl->assign('filterBrowser', $filterBrowser);
+		$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
+		$this->tpl->assign('filterExtension', $filterBrowserVersion);
 	}
 
 	/**

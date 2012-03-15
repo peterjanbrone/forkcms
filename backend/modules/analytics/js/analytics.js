@@ -17,6 +17,13 @@ jsBackend.analytics =
 		$chartPageNotFoundStatistics = $('#chartPageNotFoundStatistics');
 		$chartWidgetPageNotFoundStatistics = $('#chartWidgetPageNotFoundStatistics');
 
+		// filter variables
+		$filterExtension = $('#extension');
+		$filterIsLoggedIn = $('#isLoggedIn');
+		$filterCallerIsAction = $('#callerIsAction');
+		$filterBrowser = $('#browser');
+		$filterBrowserVersion = $('#browserVersion');
+
 		jsBackend.analytics.charts.init();
 		jsBackend.analytics.chartDoubleMetricPerDay.init();
 		jsBackend.analytics.chartPieChart.init();
@@ -24,6 +31,7 @@ jsBackend.analytics =
 		jsBackend.analytics.chartWidget.init();
 		jsBackend.analytics.chartPageNotFoundStatistics.init();
 		jsBackend.analytics.chartWidgetPageNotFoundStatistics.init();
+		jsBackend.analytics.pageNotFoundStatistics.init();
 		jsBackend.analytics.loading.init();
 		jsBackend.analytics.resize.init();
 	}
@@ -322,6 +330,12 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 	init: function()
 	{
 		if($chartPageNotFoundStatistics.length > 0) { jsBackend.analytics.chartPageNotFoundStatistics.create(); }
+
+		// show day details when clicking on a chart node
+		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
+
+		// show details, except when the row text is 'none...'
+		$("#dataGridPageNotFoundStatistics td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
 	},
 
 	create: function()
@@ -380,11 +394,18 @@ jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 	init: function()
 	{
 		if($chartWidgetPageNotFoundStatistics.length > 0) { jsBackend.analytics.chartWidgetPageNotFoundStatistics.create(); }
+
+		// show day details when clicking on a chart node
+		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
+
+		// show details, except when the row text is 'none...'
+		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
 	},
 
 	// add new chart
 	create: function()
 	{
+		console.log('test');
 		var xAxisItems = $('#datachartWidgetPageNotFoundStatistics ul.series li.serie:first-child ul.data li');
 		var xAxisValues = [];
 		var xAxisCategories = [];
@@ -423,87 +444,142 @@ jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 			},
 			series: [ { name: metric1Name, data: metric1Data, type: 'area' }]
 		});
+	},
 
-		// refresh the datagrid when clicking on the chartnodes
-		$('#chartWidgetPageNotFoundStatistics .highcharts-tracker').click(function() {
+	// destroy chart
+	destroy: function()
+	{
+		jsBackend.analytics.chartWidgetPageNotFoundStatistics.chart.destroy();
+	}
+}
 
-			// extract the date from the tooltip
-			var tooltipText = $('#chartWidgetPageNotFoundStatistics .highcharts-tooltip').text();
-			var dateString = tooltipText.replace('Pages', '').split(':')[0];
+jsBackend.analytics.pageNotFoundStatistics =
+{
+	init: function()
+	{
+		if($filterExtension.length > 0) {
 			
-			// append the year and get the unix timestamp
-			var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
-			date = new Date(dateString + ' ' + year);
-			var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
+			// add event listeners
+			$filterIsLoggedIn.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
+			$filterCallerIsAction.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
+			$filterExtension.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
+			$filterBrowser.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
+			$filterBrowserVersion.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
+		}
+	},
 
-			// check if we even need to refresh
-			if($('#pageNotFoundDate').text() === dateString + ' missing pages:') return;
+	filter: function()
+	{
+		// calculate the timestamp
+		var headerDate = $('#pageNotFoundDate').text();
+		var dateString = headerDate.replace('missing pages:', '');
 
-			// collapse the datagrid
-			$('#pageNotFoundIndex').slideUp('medium', function() {});
+		// append the year and get the unix timestamp
+		var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
+		date = new Date(dateString + ' ' + year);
+		var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
 
-			// reset the date
-			$('#pageNotFoundDate').text(dateString + ' missing pages:');
-
-			// move the spinner !
-			var ajaxSpinner = $('#ajaxSpinner');
-			var style = ajaxSpinner.attr('style');
-			ajaxSpinner.remove();
-			ajaxSpinner.insertAfter('#pageNotFoundDate');
-			ajaxSpinner.attr('style', 'position:relative; left: 8px;');
-
-			// call to refresh the grid
-			$.ajax(
+		$.ajax(
+		{
+			data:
 			{
-				data:
+				fork: { action: 'filter_statistics' , module: 'analytics'},
+				timestamp: timestamp,
+				isLoggedIn: $filterIsLoggedIn.attr('checked'),
+				callerIsAction: $filterCallerIsAction.attr('checked'),
+				extension: $filterExtension.val(),
+				browser: $filterBrowser.val(),
+				browserVersion: $filterBrowserVersion.val()
+			},
+			success: function(json, textStatus)
+			{
+				if(json.code != 200)
 				{
-					fork: { action: 'reload_datagrid' , module: 'analytics'},
-					timestamp: timestamp
-				},
-				success: function(json, textStatus)
-				{
-					if(json.code != 200)
-					{
-						// show error if needed
-						if(jsBackend.debug) alert(textStatus);
-					}
-					else
-					{
-						// build the new table html
-						var html = '';
-						var counter = 0;
-
-						for(var url in json.data.data)
-						{
-							(counter % 2 == 0)
-								? html += '<tr class="even"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>'
-								: html += '<tr class="odd"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>';
-							counter++;
-						}
-
-						// insert a 'no-results-message'
-						if(html === '') html += '<tr class="even"><td>none...</td></tr>';
-
-						// switch the table data
-						$('#pageNotFoundIndex tbody').empty().append(html);
-
-						// expand the datagrid
-						$('#pageNotFoundIndex').slideDown('slow', function() {});
-
-						// show details on click
-						$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.chartWidgetPageNotFoundStatistics.toggleDetails(e);});
-
-						// move the spinner back to it's place
-						ajaxSpinner.attr('style', style);
-						ajaxSpinner.insertAfter('#messaging');
-					}
+					// show error if needed
+					if(jsBackend.debug) alert(textStatus);
 				}
-			});
-	    });
+				else
+				{
+					console.log('success');
+				}
+			}
+		});
+	},
 
-		// show details, except when the row text is 'none...'
-		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.chartWidgetPageNotFoundStatistics.toggleDetails(e);});
+	toggleDays: function()
+	{
+		// extract the date from the tooltip
+		var tooltipText = $('#chartPageNotFoundStatistics .highcharts-tooltip').text();
+		var dateString = tooltipText.replace('Pages', '').split(':')[0];
 
+		// append the year and get the unix timestamp
+		var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
+		date = new Date(dateString + ' ' + year);
+		var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
+
+		// check if we even need to refresh
+		if($('#pageNotFoundDate').text() === dateString + ' missing pages:') return;
+
+		// collapse the datagrid
+		$('#pageNotFoundIndex').slideUp('medium', function() {});
+
+		// reset the date
+		$('#pageNotFoundDate').text(dateString + ' missing pages:');
+
+		// move the spinner !
+		var ajaxSpinner = $('#ajaxSpinner');
+		var style = ajaxSpinner.attr('style');
+		ajaxSpinner.remove();
+		ajaxSpinner.insertAfter('#pageNotFoundDate');
+		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
+
+		// call to refresh the grid
+		$.ajax(
+		{
+			data:
+			{
+				fork: { action: 'reload_datagrid' , module: 'analytics'},
+				timestamp: timestamp
+			},
+			success: function(json, textStatus)
+			{
+				if(json.code != 200)
+				{
+					// show error if needed
+					if(jsBackend.debug) alert(textStatus);
+				}
+				else
+				{
+					// build the new table html
+					var html = '';
+					var counter = 0;
+
+					for(var url in json.data.data)
+					{
+						(counter % 2 == 0)
+							? html += '<tr class="even"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>'
+							: html += '<tr class="odd"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>';
+						counter++;
+					}
+
+					// insert a 'no-results-message'
+					if(html === '') html += '<tr class="even"><td>none...</td></tr>';
+
+					// switch the table data
+					$('#pageNotFoundIndex tbody').empty().append(html);
+
+					// expand the datagrid
+					$('#pageNotFoundIndex').slideDown('slow', function() {});
+
+					// show details on click
+					$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
+
+					// move the spinner back to it's place
+					ajaxSpinner.attr('style', style);
+					ajaxSpinner.insertAfter('#messaging');
+				}
+			}
+		});
 	},
 
 	toggleDetails: function(e)
@@ -580,12 +656,6 @@ jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 				}
 			}
 		});
-	},
-
-	// destroy chart
-	destroy: function()
-	{
-		jsBackend.analytics.chartWidgetPageNotFoundStatistics.chart.destroy();
 	}
 }
 

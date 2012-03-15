@@ -26,11 +26,18 @@
 		font-size: 11px;
 	}
 
-#pageNotFoundStatsWidget {
-	width: 270px;
+#chartPageNotFoundStatistics {
+	position: relative;
+	right: 10px;
+	width: 100%;
+	min-width: 270px;
 	margin: 0 auto;
 }
 
+#pageNotFoundIndex {
+	overflow: auto;
+	max-height: 480px;
+}
 #widgetAnalyticsPageNotFoundStats .boxLevel2 .heading{
 	height: 16px;
 }

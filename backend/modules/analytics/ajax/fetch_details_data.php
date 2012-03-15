@@ -35,7 +35,7 @@ class BackendAnalyticsAjaxFetchDetailsData extends BackendBaseAJAXAction
 		$data = BackendAnalyticsModel::getDashboardData(array('pages'), $startTimestamp, $endTimestamp, true);
 
 		// filter the data
-		$data = BackendAnalyticsModel::filterData($data);
+		$data = BackendAnalyticsModel::convertForHighchart($data);
 
 		// get the correct day
 		$result = array();
