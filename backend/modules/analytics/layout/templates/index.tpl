@@ -147,23 +147,23 @@
 
 								<div id="pageNotFoundStatisticsFilter">
 									<h4>Filter:</h4>
-									<p>user logged in:<p>
+									<p>user logged in:</p>
 									<input type=checkbox name="user_logged_in" id="isLoggedIn"/>
 
-									<p>caller is module action:<p>
+									<p>caller is module action:</p>
 									<input type=checkbox name="caller_is_action" id="callerIsAction"/>
 
 									{option:filterExtension}
-									<p>extension<p>
+									<p>extension</p>
 									<select id="extension">
-										{iteration:filterBrowserVersion}
-										<option>{$filterBrowserVersion.versionId}</option>
-										{/iteration:filterBrowserVersion}
+										{iteration:filterExtension}
+										<option>{$filterExtension.name}</option>
+										{/iteration:filterExtension}
 									</select>
 									{/option:filterExtension}
 
 									{option:filterBrowser}
-									<p>browser<p>
+									<p>browser</p>
 									<select id="browser">
 										{iteration:filterBrowser}
 										<option>{$filterBrowser.name}</option>
@@ -172,7 +172,7 @@
 									{/option:filterBrowser}
 
 									{option:filterBrowserVersion}
-									<p>version<p>
+									<p>version</p>
 									<select id="browserVersion">
 										{iteration:filterBrowserVersion}
 										<option>{$filterBrowserVersion.versionId}</option>

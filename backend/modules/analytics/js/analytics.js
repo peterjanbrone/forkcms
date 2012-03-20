@@ -405,7 +405,6 @@ jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 	// add new chart
 	create: function()
 	{
-		console.log('test');
 		var xAxisItems = $('#datachartWidgetPageNotFoundStatistics ul.series li.serie:first-child ul.data li');
 		var xAxisValues = [];
 		var xAxisCategories = [];
@@ -500,7 +499,30 @@ jsBackend.analytics.pageNotFoundStatistics =
 				}
 				else
 				{
-					console.log('success');
+					$('#dataChartPageNotFoundStatistics ul.data li').remove();
+
+					var maxYAxis = 0;
+					for(var i in json.data.data)
+					{
+						var date = new Date(json.data.data[i].timestamp * 1000);
+
+						$('#dataChartPageNotFoundStatistics ul.data').append(
+							'<li><span class="fulldate">' + date.format(" ddd d mmm ") +
+							'</span><span class="date">' + date.format(" d mmm ") +
+							'</span><span class="value">' + json.data.data[i].pageviews.length +
+							'</span></li>'
+						);
+						if(json.data.data[i].pageviews.length  > maxYAxis)
+							maxYAxis = json.data.data[i].pageviews.length;
+					}
+
+					$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis);
+					(maxYAxis == 2)
+						? $('#chartPageNotFoundStatisticsTickInterval').html('1')
+						: $('#chartPageNotFoundStatisticsTickInterval').html('');
+
+					jsBackend.analytics.chartPageNotFoundStatistics.init();
+					console.log(json.data);
 				}
 			}
 		});
@@ -635,16 +657,19 @@ jsBackend.analytics.pageNotFoundStatistics =
 				}
 				else
 				{
+					console.log(json.data.data);
 					// build the html
 					var html = '';
 					html += '<div class="detailsPane">';
 					html += '<h3>Page info:</h3>';
-					html += '<p>full-url: ' + json.data.data.full_url + '</p>';
-					html += '<p>pageviews:' + json.data.data.pageviews + ' unique events:' + json.data.data.unique_events + '</p>';
+					html += '<p><span>full-url:</span> ' + json.data.data.full_url + '</p>';
+					html += '<p><span>pageviews:</span>' + json.data.data.pageviews + ' unique (' + json.data.data.unique_pageviews + ')</p>';
+					html += '<p><span>extension:</span> ' + json.data.data.extension + '</p>';
 					html += '<h3>Browser info:</h3>';
 					html += '<p>' + json.data.data.browser + ' version ' + json.data.data.browser_version + '</p>';
-					html += '<h3>Language:</h3>';
-					html += '<p>' + json.data.data.language + '</p>';
+					html += '<h3>Extra info:</h3>';
+					html += '<p><span>logged in: </span>' + json.data.data.is_logged_in + '</p>';
+					html += '<p><span>caller is action: </span>' + json.data.data.caller_is_action + '</p>';
 					html += '</div>';
 
 					// insert the details

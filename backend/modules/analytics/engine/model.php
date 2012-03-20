@@ -150,12 +150,13 @@ class BackendAnalyticsModel
 				// store all other info
 				array_push($filteredData[$index]['pages_info'], array(
 						'full_url'=> $data[$i + $counter]['pagePath'],
-						'unique_events'=> $data[$i + $counter]['uniqueEvents'],
+						'unique_pageviews'=> $data[$i + $counter]['uniquePageviews'],
 						'pageviews'=> $data[$i + $counter]['pageviews'],
 						'browser'=> $data[$i + $counter]['browser'],
 						'browser_version'=> $data[$i + $counter]['browserVersion'],
-						'language'=> $data[$i + $counter]['language'],
-						'referrer'=> $data[$i + $counter]['referralPath']
+						'extension' => $data[$i + $counter]['customVarValue1'],
+						'is_logged_in' => $data[$i + $counter]['customVarValue2'],
+						'caller_is_action' => $data[$i + $counter]['customVarValue3']
 				));
 
 				$counter++;
@@ -163,6 +164,10 @@ class BackendAnalyticsModel
 				// break if index gets too big
 				if($i + $counter === count($data)) break;
 			}
+
+			//
+			if(count($filteredData[$index]['pageviews']) < 1)
+			array_push($filteredData[$index]['pageviews'], array('index'=> 0, 'url'=> 'none...'));
 
 			// get the new day
 			if($i + $counter < count($data)) $timestamp = $data[$i + $counter]['timestamp'];

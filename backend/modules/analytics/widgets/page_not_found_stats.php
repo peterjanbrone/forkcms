@@ -104,6 +104,6 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$this->tpl->assign('pageNotFoundDate', date("D j M", (int)$dashboardData[0]['timestamp']) . ' missing pages:');
 
 		// assign first day data
-		$this->tpl->assign('missingPages', $dashboardData[0]);
+		if($dashboardData !== false) $this->tpl->assign('missingPages', $dashboardData[0]);
 	}
 }

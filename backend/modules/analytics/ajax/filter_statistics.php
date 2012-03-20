@@ -22,7 +22,6 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		parent::execute();
 
 		// get parameters
-		$timestamp = trim(SpoonFilter::getPostValue('timestamp', null, '', 'string'));
 		$callerIsAction = trim(SpoonFilter::getPostValue('callerIsAction', null, '', 'string'));
 		$extension = trim(SpoonFilter::getPostValue('extension', null, '', 'string'));
 		$browser = trim(SpoonFilter::getPostValue('browser', null, '', 'string'));
@@ -37,61 +36,63 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		// make highchart usable
 		$data = BackendAnalyticsModel::convertForHighchart($data);
 
-		// start filtering
-		$result = array();
-		foreach($data as $dataItem)
+		foreach($data as &$dataItem)
 		{
-			// filter out the correct day
-			if((int)$dataItem['timestamp'] === (int)$timestamp)
+			// now start applying all the other filters
+			foreach($dataItem['pages_info'] as $i => $pageInfo)
 			{
-				$result = $dataItem;
-
-				// now start applying all the other filters
-				foreach($result['pages_info'] as $i => $pageInfo)
+				// user logged in?
+				if($isLoggedIn === 'checked')
 				{
-					// caller is action?
-					if($callerIsAction === 'checked')
+					if($pageInfo['is_logged_in'] === 'no')
 					{
-						if($pageInfo['caller_is_action'] !== 'yes') {
-							unset($result[$i]);
-							continue;
-						}
+						unset($dataItem['pages_info'][$i]);
+						unset($dataItem['pageviews'][$i]);
+						continue;
 					}
+				}
 
-					// user logged in?
-					if($isLoggedIn === 'checked')
+				// caller is action?
+				if($callerIsAction === 'checked')
+				{
+					if($pageInfo['caller_is_action'] !== 'yes')
 					{
-						if($pageInfo['is_logged_in'] !== 'yes') {
-							unset($result[$i]);
-							continue;
-						}
+						unset($dataItem['pages_info'][$i]);
+						unset($dataItem['pageviews'][$i]);
+						continue;
 					}
+				}
 
-					// extension?
-					if($extension !== '-')
+				// extension?
+				if($extension !== '-')
+				{
+					if($pageInfo['extension'] !== $extension)
 					{
-						if($pageInfo['extension'] !== $extension) {
-							unset($result[$i]);
-							continue;
-						}
+						unset($dataItem['pages_info'][$i]);
+						unset($dataItem['pageviews'][$i]);
+						continue;
 					}
+				}
 
-					// browser?
-					if($browser !== '-')
+				// browser?
+				if($browser !== '-')
+				{
+					if($pageInfo['browser'] !== $browser)
 					{
-						if($pageInfo['browser'] !== $browser) {
-							unset($result[$i]);
-							continue;
-						}
+						unset($dataItem['pages_info'][$i]);
+						unset($dataItem['pageviews'][$i]);
+						continue;
 					}
+				}
 
-					// browser version?
-					if($browserVersion !== '-')
+				// browser version?
+				if($browserVersion !== '-')
+				{
+					if($pageInfo['browser_version'] !== $browser)
 					{
-						if($pageInfo['browser_version'] !== $browser) {
-							unset($result[$i]);
-							continue;
-						}
+						unset($dataItem['pages_info'][$i]);
+						unset($dataItem['pageviews'][$i]);
+						continue;
 					}
 				}
 			}
@@ -102,7 +103,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 				self::OK,
 				array(
 						'status' => 'success',
-						'data' => $result
+						'data' => $data
 				),
 				'Data has been retrieved.'
 		);

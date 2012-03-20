@@ -119,12 +119,12 @@ class BackendAnalyticsHelper
 	public static function getDashboardData($startTimestamp, $endTimestamp)
 	{
 		// get metrics
-		$metrics = array('pageviews', 'visitors', 'uniqueEvents');
+		$metrics = array('uniquePageviews', 'pageviews', 'visitors');
 		$gaMetrics = array();
 		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
 
 		// get dimensions
-		$dimensions = array('pagePath', 'referralPath', 'browser', 'browserVersion', 'language', 'date');
+		$dimensions = array('date', 'pagePath', 'browser', 'browserVersion', 'customVarValue1', 'customVarValue2', 'customVarValue3');
 		$gaDimensions = array();
 		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
 

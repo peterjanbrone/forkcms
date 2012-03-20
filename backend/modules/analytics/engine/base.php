@@ -35,6 +35,7 @@ class BackendAnalyticsBase extends BackendBaseActionIndex
 	{
 		parent::execute();
 		$this->header->addJS('highcharts.js', 'core', false);
+		$this->header->addJS('date.format.js', 'core', false);
 		$this->setDates();
 	}
 

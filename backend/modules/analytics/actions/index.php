@@ -269,7 +269,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 
 			// get filter data
 			$browsers = array();
-			$extensions = array();
+			$extensions = array(array('name' => '-'));
 			foreach($statistics as $stat)
 			{
 				foreach($stat['pages_info'] as $page)
@@ -283,7 +283,8 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 						array_push($browsers[$page['browser']]['versions'], $page['browser_version']);
 
 					// get all extensions
-					// @TODO add extension funct.
+					if(!in_array($page['extension'], $extensions))
+						$extensions[$page['extension']] = array('name' => $page['extension']);
 				}
 			}
 
@@ -314,7 +315,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		// assign the filter data
 		$this->tpl->assign('filterBrowser', $filterBrowser);
 		$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
-		$this->tpl->assign('filterExtension', $filterBrowserVersion);
+		$this->tpl->assign('filterExtension', $extensions);
 	}
 
 	/**

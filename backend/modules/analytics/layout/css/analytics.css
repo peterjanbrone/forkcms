@@ -150,11 +150,45 @@
 }
 
 #pageNotFoundStatisticsFilter p {
-	float: left;
+	float:left;
+	width: 130px;
+}
+
+
+#pageNotFoundStatisticsFilter input, #pageNotFoundStatisticsFilter select{
+	float: right;
+	width: 60px;
 }
 
 #highChartsLink {
 	clear: both;
+}
+
+/* Page not found details */
+
+.detailsPane {
+	display:none;
+	padding: 4px 12px 14px 24px;
+	overflow-x: hidden;
+	background-color: #F2F2F2;
+	border-top: 2px solid white;
+	border-bottom: 2px solid white;
+}
+
+
+.detailsPane span {
+	display:block;
+	width: 100px;
+	float:left;
+}
+
+.detailsPane h3{
+	line-height: 1.5;
+	padding: 10px 0px 4px;
+	color: #058DC7;
+}
+.detailsPane p{
+	line-height: 1.5;
 }
 
 /* Settings page */
