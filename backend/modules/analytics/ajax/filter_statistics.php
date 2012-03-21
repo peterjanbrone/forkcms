@@ -71,6 +71,12 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		);
 	}
 
+	/**
+	 * This function filters all page statistics
+	 *
+	 * @param array $data
+	 * @return array
+	 */
 	public function filter($data)
 	{
 		// get parameters
@@ -143,7 +149,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 			// make sure '...none' is re-applied
 			if(sizeof($dataItem['pageviews']) < 1)
 			{
-				$dataItem['pageviews'] = array(array('index'=> 0, 'url'=> 'none...'));
+				$dataItem['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
 			}
 		}
 

@@ -529,21 +529,34 @@ jsBackend.analytics.pageNotFoundStatistics =
 
 					// init to re-bind all event listeners
 					jsBackend.analytics.chartPageNotFoundStatistics.init();
+
+					// make sure the datagrid refreshes
+					jsBackend.analytics.pageNotFoundStatistics.toggleDays(json.data.data[0].data[i].date * 1000);
 				}
 			}
 		});
 	},
 
-	toggleDays: function()
+	toggleDays: function(timestamp)
 	{
-		// extract the date from the tooltip
-		var tooltipText = $('#chartPageNotFoundStatistics .highcharts-tooltip').text();
-		var dateString = tooltipText.replace('Pages', '').split(':')[0];
+		// calculate the timestamp if it's undefined
+		if(timestamp === undefined)
+		{
+			// extract the date from the tooltip
+			var tooltipText = $('#chartPageNotFoundStatistics .highcharts-tooltip').text();
+			var dateString = tooltipText.replace('Pageviews', '').split(':')[0];
 
-		// append the year and get the unix timestamp
-		var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
-		date = new Date(dateString + ' ' + year);
-		var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
+			// append the year and get the unix timestamp
+			var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
+			var date = new Date(dateString + ' ' + year);
+			var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
+		}
+
+		// make sure dateString isn't undefined when a timestamp is given
+		else
+		{
+			var dateString = new Date(timestamp).format("ddd d mmm");
+		}
 
 		// check if we even need to refresh
 		if($('#pageNotFoundDate').text() === dateString + ' missing pages:') return;
@@ -663,7 +676,6 @@ jsBackend.analytics.pageNotFoundStatistics =
 				}
 				else
 				{
-					console.log(json.data.data);
 					// build the html
 					var html = '';
 					html += '<div class="detailsPane">';
@@ -830,6 +842,7 @@ jsBackend.analytics.resize =
 			}
 			if($chartDoubleMetricPerDay.length > 0)
 			{
+				console.log('obv');
 				$chartDoubleMetricPerDay.html('&nbsp;');
 				jsBackend.analytics.chartDoubleMetricPerDay.create();
 			}
@@ -843,7 +856,7 @@ jsBackend.analytics.resize =
 				$chartWidget.html('&nbsp;');
 				jsBackend.analytics.chartWidget.create();
 			}
-			if($chartPageNotFoundStatistics > 0)
+			if($chartPageNotFoundStatistics.length > 0)
 			{
 				$chartPageNotFoundStatistics.html('&nbsp;');
 				jsBackend.analytics.chartPageNotFoundStatistics.create();

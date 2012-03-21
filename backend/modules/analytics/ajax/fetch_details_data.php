@@ -41,7 +41,7 @@ class BackendAnalyticsAjaxFetchDetailsData extends BackendBaseAJAXAction
 		$result = array();
 		foreach($data as $dataItem)
 		{
-			if((int)$dataItem['timestamp'] === (int)$timestamp)
+			if((int) $dataItem['timestamp'] === (int) $timestamp)
 			{
 				$result = $dataItem['pages_info'][$index];
 			}

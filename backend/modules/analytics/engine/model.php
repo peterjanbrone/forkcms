@@ -35,7 +35,7 @@ class BackendAnalyticsModel
 	 *
 	 * @var	array
 	 */
-	private static $data = array(), $dashboardData = array(), $pageNotFoundData = array();
+	private static $data = array(), $dashboardData = array();
 
 	/**
 	 * Checks the settings and optionally returns an array with warnings
@@ -100,8 +100,8 @@ class BackendAnalyticsModel
 		while($counter < 9)
 		{
 			$results[$counter] = array();
-			$results[$counter]['timestamp'] = (int)$startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
-			$results[$counter]['pageviews'] = array(array('index'=> 0, 'url'=> 'none...'));
+			$results[$counter]['timestamp'] = (int) $startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
+			$results[$counter]['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
 			$results[$counter]['pages_info'] = array();
 			$counter++;
 		}
@@ -136,8 +136,9 @@ class BackendAnalyticsModel
 					$url = $parts[0] . '?';
 
 					// still too long?
-					if(strlen($url) > 40) {
-						$url = substr((string)$url, 0, 39);
+					if(strlen($url) > 40)
+					{
+						$url = substr((string) $url, 0, 39);
 					}
 
 					// indicate it's been cut off
@@ -145,15 +146,15 @@ class BackendAnalyticsModel
 				}
 
 				// store index and url
-				array_push($filteredData[$index]['pageviews'], array('index'=> $i + $counter, 'url'=> $url));
+				array_push($filteredData[$index]['pageviews'], array('index' => $i + $counter, 'url' => $url));
 
 				// store all other info
 				array_push($filteredData[$index]['pages_info'], array(
-						'full_url'=> $data[$i + $counter]['pagePath'],
-						'unique_pageviews'=> $data[$i + $counter]['uniquePageviews'],
-						'pageviews'=> $data[$i + $counter]['pageviews'],
-						'browser'=> $data[$i + $counter]['browser'],
-						'browser_version'=> $data[$i + $counter]['browserVersion'],
+						'full_url' => $data[$i + $counter]['pagePath'],
+						'unique_pageviews' => $data[$i + $counter]['uniquePageviews'],
+						'pageviews' => $data[$i + $counter]['pageviews'],
+						'browser' => $data[$i + $counter]['browser'],
+						'browser_version' => $data[$i + $counter]['browserVersion'],
 						'extension' => $data[$i + $counter]['customVarValue1'],
 						'is_logged_in' => $data[$i + $counter]['customVarValue2'],
 						'caller_is_action' => $data[$i + $counter]['customVarValue3']
@@ -179,10 +180,10 @@ class BackendAnalyticsModel
 			for($j = 0; $j < count($filteredData); $j++)
 			{
 				// insert if the dates match
-				if((int)$results[$i]['timestamp'] == (int)$filteredData[$j]['timestamp'])
+				if((int) $results[$i]['timestamp'] == (int) $filteredData[$j]['timestamp'])
 				{
-					$results[$i]['pageviews'] = (array)$filteredData[$j]['pageviews'];
-					$results[$i]['pages_info'] = (array)$filteredData[$j]['pages_info'];
+					$results[$i]['pageviews'] = (array) $filteredData[$j]['pageviews'];
+					$results[$i]['pages_info'] = (array) $filteredData[$j]['pages_info'];
 				}
 			}
 		}

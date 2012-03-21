@@ -37,10 +37,12 @@ class BackendAnalyticsAjaxReloadDatagrid extends BackendBaseAJAXAction
 		$result = array();
 		foreach($data as $dataItem)
 		{
-			if((int)$dataItem['timestamp'] === (int)$timestamp)
+			if((int) $dataItem['timestamp'] === (int) $timestamp)
 			{
 				foreach($dataItem['pageviews'] as $page)
+				{
 					array_push($result, $page['url']);
+				}
 			}
 		}
 

@@ -135,9 +135,7 @@
 /* Page Not Found Statistics */
 
 #chartPageNotFoundStatistics {
-	float: left;
-	width: 70%;
-	max-width: 750px;
+	margin-right: 224px;
 }
 
 #dataGridPageNotFoundStatistics {
@@ -146,22 +144,37 @@
 }
 
 #pageNotFoundStatisticsFilter {
-	float: right;
+	position: absolute;
+	top: 24px;
+	right: 12px;
 	width: 200px;
+}
+
+#pageNotFoundStatisticsFilter span{
+	position: relative;
+	top: -3px;
+	display: block;
+	width: 174px;
+	height: 153px;
+	padding: 12px;
+	border: 1px solid #CCC;
+	border-top: none;
 }
 
 #pageNotFoundStatisticsFilter p {
 	float:left;
-	width: 100px;
+	width: 90px;
 	clear: left;
+	padding-bottom: 14px;
 }
 
 .boxLevel2 h4  {
-	margin-bottom: 15px;
+	margin: 0px;
+	padding-left: 12px;
 }
 #pageNotFoundStatisticsFilter input, #pageNotFoundStatisticsFilter select{
 	float: right;
-	width: 90px;
+	width: 78px;
 }
 
 #highChartsLink {

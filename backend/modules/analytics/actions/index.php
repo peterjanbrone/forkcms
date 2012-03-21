@@ -279,15 +279,21 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 				{
 					// get all browsers
 					if(!in_array($page['browser'], $browsers))
+					{
 						$browsers[$page['browser']] = array('name' => $page['browser'], 'versions' => array());
+					}
 
 					// get all versions of each browser
 					if(!in_array($page['browser_version'], $browsers[$page['browser']]['versions']))
+					{
 						array_push($browsers[$page['browser']]['versions'], $page['browser_version']);
+					}
 
 					// get all extensions
 					if(!in_array($page['extension'], $extensions))
+					{
 						$extensions[$page['extension']] = array('name' => $page['extension']);
+					}
 				}
 			}
 
@@ -310,7 +316,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
 
 		// assign the date
-		$this->tpl->assign('pageNotFoundDate', date("D j M", (int)$statistics[0]['timestamp']) . ' missing pages:');
+		$this->tpl->assign('pageNotFoundDate', date("D j M", (int) $statistics[0]['timestamp']) . ' missing pages:');
 
 		// assign the datagrid data
 		$this->tpl->assign('missingPages', $statistics[0]);

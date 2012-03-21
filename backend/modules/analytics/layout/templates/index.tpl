@@ -147,6 +147,7 @@
 
 								<div id="pageNotFoundStatisticsFilter">
 									<h4>Filter:</h4>
+									<span>
 									<p>user logged in:</p>
 									<input type=checkbox name="user_logged_in" id="isLoggedIn"/>
 
@@ -154,7 +155,7 @@
 									<input type=checkbox name="caller_is_action" id="callerIsAction"/>
 
 									{option:filterExtension}
-									<p>extension</p>
+									<p>extension:</p>
 									<select id="extension">
 										{iteration:filterExtension}
 										<option>{$filterExtension.name}</option>
@@ -163,7 +164,7 @@
 									{/option:filterExtension}
 
 									{option:filterBrowser}
-									<p>browser</p>
+									<p>browser:</p>
 									<select id="browser">
 										{iteration:filterBrowser}
 										<option>{$filterBrowser.name}</option>
@@ -172,13 +173,14 @@
 									{/option:filterBrowser}
 
 									{option:filterBrowserVersion}
-									<p>version</p>
+									<p>version:</p>
 									<select id="browserVersion">
 										{iteration:filterBrowserVersion}
 										<option>{$filterBrowserVersion.versionId}</option>
 										{/iteration:filterBrowserVersion}
 									</select>
 									{/option:filterBrowserVersion}
+									</span>
 								</div>
 
 								<div id="dataGridPageNotFoundStatistics" class="boxLevel2">

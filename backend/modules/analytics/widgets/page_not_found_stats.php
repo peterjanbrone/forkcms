@@ -8,10 +8,9 @@
 */
 
 /**
- * This widget will show the latest traffic sources
-*
-* @author Peter-Jan Brone <peterjan.brone@netlash.com>
-*/
+ * @author Peter-Jan Brone <peterjan.brone@netlash.com>
+ */
+
 class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 {
 
@@ -104,7 +103,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$this->tpl->assign('analyticsPageNotFoundStatsGraphData', $graphData);
 
 		// assign the date
-		$this->tpl->assign('pageNotFoundDate', date("D j M", (int)$dashboardData[0]['timestamp']) . ' missing pages:');
+		$this->tpl->assign('pageNotFoundDate', date("D j M", (int) $dashboardData[0]['timestamp']) . ' missing pages:');
 
 		// assign first day data
 		if($dashboardData !== false) $this->tpl->assign('missingPages', $dashboardData[0]);
