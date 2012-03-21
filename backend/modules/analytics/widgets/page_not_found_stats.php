@@ -80,7 +80,10 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 
 					// build array
 					$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-					$graphData[$i]['data'][$j]['value'] = (string) count($data[$metric]);
+					$graphData[$i]['data'][$j]['value'] = (int) count($data[$metric]);
+
+					// perform an extra check to determine if we counted the 'none...' row
+					if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
 				}
 			}
 		}

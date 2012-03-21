@@ -101,7 +101,7 @@ class BackendAnalyticsModel
 		{
 			$results[$counter] = array();
 			$results[$counter]['timestamp'] = (int)$startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
-			$results[$counter]['pageviews'] = array();
+			$results[$counter]['pageviews'] = array(array('index'=> 0, 'url'=> 'none...'));
 			$results[$counter]['pages_info'] = array();
 			$counter++;
 		}
@@ -164,10 +164,6 @@ class BackendAnalyticsModel
 				// break if index gets too big
 				if($i + $counter === count($data)) break;
 			}
-
-			//
-			if(count($filteredData[$index]['pageviews']) < 1)
-			array_push($filteredData[$index]['pageviews'], array('index'=> 0, 'url'=> 'none...'));
 
 			// get the new day
 			if($i + $counter < count($data)) $timestamp = $data[$i + $counter]['timestamp'];

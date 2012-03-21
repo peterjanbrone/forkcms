@@ -499,30 +499,36 @@ jsBackend.analytics.pageNotFoundStatistics =
 				}
 				else
 				{
+					// remove all current data
 					$('#dataChartPageNotFoundStatistics ul.data li').remove();
 
+					// insert the new data,
+					// meanwhile calc. maxYAxis
 					var maxYAxis = 0;
-					for(var i in json.data.data)
+					for(var i in json.data.data[0].data)
 					{
-						var date = new Date(json.data.data[i].timestamp * 1000);
+						// get date for formatting
+						var date = new Date(json.data.data[0].data[i].date * 1000);
 
 						$('#dataChartPageNotFoundStatistics ul.data').append(
 							'<li><span class="fulldate">' + date.format(" ddd d mmm ") +
 							'</span><span class="date">' + date.format(" d mmm ") +
-							'</span><span class="value">' + json.data.data[i].pageviews.length +
+							'</span><span class="value">' + json.data.data[0].data[i].value +
 							'</span></li>'
 						);
-						if(json.data.data[i].pageviews.length  > maxYAxis)
-							maxYAxis = json.data.data[i].pageviews.length;
+
+						// update maxYAxis
+						if(json.data.data[0].data[i].value  > maxYAxis) maxYAxis = json.data.data[0].data[i].value;
 					}
 
+					// set max Y and tick interval
 					$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis);
 					(maxYAxis == 2)
 						? $('#chartPageNotFoundStatisticsTickInterval').html('1')
 						: $('#chartPageNotFoundStatisticsTickInterval').html('');
 
+					// init to re-bind all event listeners
 					jsBackend.analytics.chartPageNotFoundStatistics.init();
-					console.log(json.data);
 				}
 			}
 		});
@@ -663,7 +669,8 @@ jsBackend.analytics.pageNotFoundStatistics =
 					html += '<div class="detailsPane">';
 					html += '<h3>Page info:</h3>';
 					html += '<p><span>full-url:</span> ' + json.data.data.full_url + '</p>';
-					html += '<p><span>pageviews:</span>' + json.data.data.pageviews + ' unique (' + json.data.data.unique_pageviews + ')</p>';
+					html += '<p><span>pageviews:</span>' + json.data.data.pageviews + '</p>';
+					html += '<p><span>unique:</span>' + json.data.data.unique_pageviews + '</p>';
 					html += '<p><span>extension:</span> ' + json.data.data.extension + '</p>';
 					html += '<h3>Browser info:</h3>';
 					html += '<p>' + json.data.data.browser + ' version ' + json.data.data.browser_version + '</p>';
