@@ -335,7 +335,7 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
 
 		// show details, except when the row text is 'none...'
-		$("#dataGridPageNotFoundStatistics td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
+		$("#dataGridPageNotFoundStatistics td").not(":contains('none...')").on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDetails();});
 	},
 
 	create: function()
@@ -399,7 +399,7 @@ jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
 
 		// show details, except when the row text is 'none...'
-		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
+		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDetails();});
 	},
 
 	// add new chart
@@ -464,6 +464,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 			$filterExtension.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterBrowser.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterBrowserVersion.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
+
 		}
 	},
 
@@ -613,7 +614,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 					$('#pageNotFoundIndex').slideDown('slow', function() {});
 
 					// show details on click
-					$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
+					$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDetails();});
 
 					// move the spinner back to it's place
 					ajaxSpinner.attr('style', style);
@@ -623,7 +624,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 		});
 	},
 
-	toggleDetails: function(e)
+	toggleDetails: function()
 	{
 		// get the row index
 		var index = e.currentTarget.attributes[0].nodeValue;
@@ -842,7 +843,6 @@ jsBackend.analytics.resize =
 			}
 			if($chartDoubleMetricPerDay.length > 0)
 			{
-				console.log('obv');
 				$chartDoubleMetricPerDay.html('&nbsp;');
 				jsBackend.analytics.chartDoubleMetricPerDay.create();
 			}

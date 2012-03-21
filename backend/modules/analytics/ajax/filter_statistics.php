@@ -55,7 +55,13 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 				$graphData[$i]['data'][$j]['value'] = (int) count($data[$metric]);
 
 				// perform an extra check to determine if we counted the 'none...' row
-				if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
+				foreach($data[$metric] as $pageview)
+				{
+					if($pageview['url'] === 'none...')
+					{
+						$graphData[$i]['data'][$j]['value'] = 0;
+					}
+				}
 			}
 		}
 
