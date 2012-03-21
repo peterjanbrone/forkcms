@@ -142,6 +142,7 @@
 
 #dataGridPageNotFoundStatistics {
 	clear: both;
+	padding-top: 20px;
 }
 
 #pageNotFoundStatisticsFilter {
@@ -151,13 +152,16 @@
 
 #pageNotFoundStatisticsFilter p {
 	float:left;
-	width: 130px;
+	width: 100px;
+	clear: left;
 }
 
-
+.boxLevel2 h4  {
+	margin-bottom: 15px;
+}
 #pageNotFoundStatisticsFilter input, #pageNotFoundStatisticsFilter select{
 	float: right;
-	width: 60px;
+	width: 90px;
 }
 
 #highChartsLink {

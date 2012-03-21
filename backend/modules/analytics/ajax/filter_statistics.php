@@ -30,7 +30,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData);
 
 		// apply the filter
-//		$dashboardData = $this->filter($dashboardData);
+		$dashboardData = $this->filter($dashboardData);
 
 		// loop metrics
 		$metrics = array('pageviews');
@@ -131,13 +131,19 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 				// browser version?
 				if($browserVersion !== '-')
 				{
-					if($pageInfo['browser_version'] !== $browser)
+					if($pageInfo['browser_version'] !== $browserVersion)
 					{
 						unset($dataItem['pages_info'][$i]);
 						unset($dataItem['pageviews'][$i]);
 						continue;
 					}
 				}
+			}
+
+			// make sure '...none' is re-applied
+			if(sizeof($dataItem['pageviews']) < 1)
+			{
+				$dataItem['pageviews'] = array(array('index'=> 0, 'url'=> 'none...'));
 			}
 		}
 

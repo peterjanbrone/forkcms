@@ -150,7 +150,7 @@
 									<p>user logged in:</p>
 									<input type=checkbox name="user_logged_in" id="isLoggedIn"/>
 
-									<p>caller is module action:</p>
+									<p>caller is action:</p>
 									<input type=checkbox name="caller_is_action" id="callerIsAction"/>
 
 									{option:filterExtension}
