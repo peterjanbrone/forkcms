@@ -83,7 +83,7 @@ class BackendAnalyticsModel
 	}
 
 	/**
-	 * Filters dashboardata for highchart use
+	 * Filters data so it's highchart-usable
 	 *
 	 * @param array data
 	 * @return array
@@ -92,19 +92,17 @@ class BackendAnalyticsModel
 	{
 		// we need stats for 9 days so first build that empty array
 		$results = array();
-		$counter = (int) 0;
 
-		// make a container array with each day, regardless if there's
-		// any data for that day
-		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
-		while($counter < 9)
+		// make a container array with each day, regardless if there's any data for that day
+		$startTimestamp = strtotime('-1 week -1 days', mktime(13, 0, 0));
+		for($i = 0; $i < 9; $i++)
 		{
-			$results[$counter] = array();
-			$results[$counter]['timestamp'] = (int) $startTimestamp + ($counter * 86400 + 46800); // add 46800 so it matches google dates
-			$results[$counter]['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
-			$results[$counter]['pages_info'] = array();
-			$counter++;
+			$results[$i] = array();
+			$results[$i]['timestamp'] = (int) $startTimestamp + ($i * 86400); // add 46800 so it matches google dates
+			$results[$i]['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
+			$results[$i]['pages_info'] = array();
 		}
+
 
 		// filter the data
 		$filteredData = array();

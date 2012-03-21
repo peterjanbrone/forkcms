@@ -335,7 +335,7 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
 
 		// show details, except when the row text is 'none...'
-		$("#dataGridPageNotFoundStatistics td").not(":contains('none...')").on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDetails();});
+		$("#dataGridPageNotFoundStatistics td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
 	},
 
 	create: function()
@@ -399,7 +399,7 @@ jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
 
 		// show details, except when the row text is 'none...'
-		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDetails();});
+		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
 	},
 
 	// add new chart
@@ -614,7 +614,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 					$('#pageNotFoundIndex').slideDown('slow', function() {});
 
 					// show details on click
-					$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDetails();});
+					$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
 
 					// move the spinner back to it's place
 					ajaxSpinner.attr('style', style);
@@ -624,7 +624,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 		});
 	},
 
-	toggleDetails: function()
+	toggleDetails: function(e)
 	{
 		// get the row index
 		var index = e.currentTarget.attributes[0].nodeValue;
