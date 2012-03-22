@@ -471,39 +471,29 @@ jsBackend.analytics.pageNotFoundStatistics =
 	init: function()
 	{
 		if($filterExtension.length > 0) {
-			
 			// add event listeners
 			$filterIsLoggedIn.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterCallerIsAction.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterExtension.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterBrowser.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterBrowserVersion.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
-
 		}
 	},
 
-	filter: function()
+	call: function(date, index, callback)
 	{
-		// calculate the timestamp
-		var headerDate = $('#pageNotFoundStatisticsDate').text();
-		var dateString = headerDate.replace('missing pages:', '');
-
-		// append the year and get the unix timestamp
-		var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
-		date = new Date(dateString + ' ' + year);
-		var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
-
 		$.ajax(
 		{
 			data:
 			{
 				fork: { action: 'filter_statistics' , module: 'analytics'},
-				timestamp: timestamp,
 				isLoggedIn: $filterIsLoggedIn.is(':checked'),
 				callerIsAction: $filterCallerIsAction.is(':checked'),
 				extension: $filterExtension.val(),
 				browser: $filterBrowser.val(),
-				browserVersion: $filterBrowserVersion.val()
+				browserVersion: $filterBrowserVersion.val(),
+				date: date,
+				index: index
 			},
 			success: function(json, textStatus)
 			{
@@ -512,72 +502,65 @@ jsBackend.analytics.pageNotFoundStatistics =
 					// show error if needed
 					if(jsBackend.debug) alert(textStatus);
 				}
-				else
-				{
-					// remove all current data
-					$('#dataChartPageNotFoundStatistics ul.data li').remove();
-
-					// insert the new data,
-					// meanwhile calc. maxYAxis
-					var maxYAxis = 0;
-					for(var i in json.data.data[0].data)
-					{
-						// get date for formatting
-						var date = new Date(json.data.data[0].data[i].date * 1000);
-
-						$('#dataChartPageNotFoundStatistics ul.data').append(
-							'<li><span class="fulldate">' + date.format(" ddd d mmm ") +
-							'</span><span class="date">' + date.format(" d mmm ") +
-							'</span><span class="value">' + json.data.data[0].data[i].value +
-							'</span></li>'
-						);
-
-						// update maxYAxis
-						if(json.data.data[0].data[i].value  > maxYAxis) maxYAxis = json.data.data[0].data[i].value;
-					}
-
-					// set max Y and tick interval
-					$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis.toString());
-
-					// init to re-bind all event listeners
-					jsBackend.analytics.chartPageNotFoundStatistics.init();
-
-					// make sure the datagrid refreshes
-					jsBackend.analytics.pageNotFoundStatistics.toggleDays(json.data.data[0].data[i].date * 1000);
-				}
+				else callback(json);
 			}
 		});
 	},
 
-	toggleDays: function(timestamp)
+	filter: function()
 	{
-		// calculate the timestamp if it's undefined
-		if(timestamp === undefined)
+		jsBackend.analytics.pageNotFoundStatistics.call('', '', function(json){
+
+			// remove all current data
+			$('#dataChartPageNotFoundStatistics ul.data li').remove();
+
+			// insert the new data,
+			// meanwhile calc. maxYAxis
+			var maxYAxis = 0;
+			for(var i in json.data.data[0].data)
+			{
+				// get date for formatting
+				var date = new Date(json.data.data[0].data[i].date * 1000);
+
+				$('#dataChartPageNotFoundStatistics ul.data').append(
+					'<li><span class="fulldate">' + date.format(" ddd d mmm ") +
+					'</span><span class="date">' + date.format(" d mmm ") +
+					'</span><span class="value">' + json.data.data[0].data[i].value +
+					'</span></li>'
+				);
+
+				// update maxYAxis
+				if(json.data.data[0].data[i].value  > maxYAxis) maxYAxis = json.data.data[0].data[i].value;
+			}
+
+			// set max Y and tick interval
+			$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis.toString());
+
+			// init to re-bind all event listeners
+			jsBackend.analytics.chartPageNotFoundStatistics.init();
+
+			// make sure the datagrid refreshes
+			var date = $('#pageNotFoundStatisticsDate').text().replace('missing pages:', '');
+			jsBackend.analytics.pageNotFoundStatistics.toggleDays(date);
+		});
+	},
+
+	toggleDays: function(date)
+	{
+		if(date === undefined)
 		{
 			// extract the date from the tooltip
-			var tooltipText = $('#chartPageNotFoundStatistics .highcharts-tooltip').text();
-			var dateString = tooltipText.replace('Pageviews', '').split(':')[0];
-
-			// append the year and get the unix timestamp
-			var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
-			var date = new Date(dateString + ' ' + year);
-			var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
-		}
-
-		// make sure dateString isn't undefined when a timestamp is given
-		else
-		{
-			var dateString = new Date(timestamp).format("ddd d mmm");
+			date = $('#chartPageNotFoundStatistics .highcharts-tooltip').text().replace('Pageviews', '').split(':')[0];
 		}
 
 		// check if we even need to refresh
-		if($('#pageNotFoundStatisticsDate').text() === dateString + ' missing pages:') return;
+		if($('#pageNotFoundStatisticsDate').text() === date + ' missing pages:') return;
 
 		// collapse the datagrid
 		$('#pageNotFoundIndex').slideUp('medium', function() {});
 
 		// reset the date
-		$('#pageNotFoundStatisticsDate').text(dateString + ' missing pages:');
+		$('#pageNotFoundStatisticsDate').text(date + ' missing pages:');
 
 		// move the spinner !
 		var ajaxSpinner = $('#ajaxSpinner');
@@ -586,63 +569,45 @@ jsBackend.analytics.pageNotFoundStatistics =
 		ajaxSpinner.insertAfter('#pageNotFoundStatisticsDate');
 		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
 
-		// call to refresh the grid
-		$.ajax(
-		{
-			data:
+		jsBackend.analytics.pageNotFoundStatistics.call(date, '', function(json){
+
+			// build the new table html
+			var html = '';
+			var counter = 0;
+
+			for(var url in json.data.data)
 			{
-				fork: { action: 'reload_datagrid' , module: 'analytics'},
-				timestamp: timestamp
-			},
-			success: function(json, textStatus)
-			{
-				if(json.code != 200)
-				{
-					// show error if needed
-					if(jsBackend.debug) alert(textStatus);
-				}
-				else
-				{
-					// build the new table html
-					var html = '';
-					var counter = 0;
-
-					for(var url in json.data.data)
-					{
-						(counter % 2 == 0)
-							? html += '<tr class="even"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>'
-							: html += '<tr class="odd"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>';
-						counter++;
-					}
-
-					// insert a 'no-results-message'
-					if(html === '') html += '<tr class="even"><td>none...</td></tr>';
-
-					// switch the table data
-					$('#pageNotFoundIndex tbody').empty().append(html);
-
-					// expand the datagrid
-					$('#pageNotFoundIndex').slideDown('slow', function() {});
-
-					// show details on click
-					$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
-
-					// move the spinner back to it's place
-					ajaxSpinner.attr('style', style);
-					ajaxSpinner.insertAfter('#messaging');
-				}
+				(counter % 2 == 0)
+					? html += '<tr class="even"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>'
+					: html += '<tr class="odd"><td data-index=' + counter + '>' + json.data.data[url] + '</td></tr>';
+				counter++;
 			}
+
+			// insert a 'no-results-message'
+			if(html === '') html += '<tr class="even"><td>none...</td></tr>';
+
+			// switch the table data
+			$('#pageNotFoundIndex tbody').empty().append(html);
+
+			// expand the datagrid
+			$('#pageNotFoundIndex').slideDown('slow', function() {});
+
+			// show details on click
+			$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
+
+			// move the spinner back to it's place
+			ajaxSpinner.attr('style', style);
+			ajaxSpinner.insertAfter('#messaging');
 		});
 	},
 
 	toggleDetails: function(e)
 	{
-
 		// get the row index
-		var index = e.currentTarget.attributes[0].nodeValue;
+		var rowIndex = e.currentTarget.attributes[0].nodeValue;
 
 		// get the row
-		var row = $('#pageNotFoundIndex tr:eq(' + index + ')');
+		var row = $('#pageNotFoundIndex tr:eq(' + rowIndex + ')');
 
 		// got details already?
 		if(row.next().hasClass('detailsPane'))
@@ -663,55 +628,31 @@ jsBackend.analytics.pageNotFoundStatistics =
 		ajaxSpinner.insertAfter('#pageNotFoundStatisticsDate');
 		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
 
-		// get the timestamp
-		var dateString = $('#pageNotFoundStatisticsDate').text().replace('missing pages:', '');
-
-		// append the year and get the unix timestamp
-		var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
-		date = new Date(dateString + ' ' + year);
-		var timestamp = Math.round(date.getTime() / 1000) + 46800; // add 46800 to equal google dates
+		var date = $('#pageNotFoundStatisticsDate').text().replace('missing pages:', '');
 
 		// fetch the data
-		$.ajax(
-		{
-			data:
-			{
-				fork: { action: 'fetch_details_data' , module: 'analytics'},
-				index: index,
-				timestamp: timestamp
-			},
-			success: function(json, textStatus)
-			{
-				if(json.code != 200)
-				{
-					// show error if needed
-					if(jsBackend.debug) alert(textStatus);
-				}
-				else
-				{
-					// build the html
-					var html = '';
-					html += '<div class="detailsPane">';
-					html += '<h3>Page info:</h3>';
-					html += '<p><span>full-url:</span> ' + json.data.data.full_url + '</p>';
-					html += '<p><span>pageviews:</span>' + json.data.data.pageviews + '</p>';
-					html += '<p><span>unique:</span>' + json.data.data.unique_pageviews + '</p>';
-					html += '<p><span>extension:</span> ' + json.data.data.extension + '</p>';
-					html += '<h3>Browser info:</h3>';
-					html += '<p>' + json.data.data.browser + ' version ' + json.data.data.browser_version + '</p>';
-					html += '<h3>Extra info:</h3>';
-					html += '<p><span>logged in: </span>' + json.data.data.is_logged_in + '</p>';
-					html += '<p><span>caller is action: </span>' + json.data.data.caller_is_action + '</p>';
-					html += '</div>';
+		jsBackend.analytics.pageNotFoundStatistics.call(date, rowIndex, function(json){
+			// build the html
+			var html = '';
+			html += '<div class="detailsPane">';
+			html += '<h3>Page info:</h3>';
+			html += '<p><span>full-url:</span> ' + json.data.data.full_url + '</p>';
+			html += '<p><span>pageviews:</span>' + json.data.data.pageviews + '</p>';
+			html += '<p><span>unique:</span>' + json.data.data.unique_pageviews + '</p>';
+			html += '<p><span>extension:</span> ' + json.data.data.extension + '</p>';
+			html += '<h3>Browser info:</h3>';
+			html += '<p>' + json.data.data.browser + ' version ' + json.data.data.browser_version + '</p>';
+			html += '<h3>Extra info:</h3>';
+			html += '<p><span>logged in: </span>' + json.data.data.is_logged_in + '</p>';
+			html += '<p><span>caller is action: </span>' + json.data.data.caller_is_action + '</p>';
+			html += '</div>';
 
-					// insert the details
-					$(html).insertAfter(row).slideDown("medium");
+			// insert the details
+			$(html).insertAfter(row).slideDown("medium");
 
-					// move the spinner back to it's place
-					ajaxSpinner.attr('style', style);
-					ajaxSpinner.insertAfter('#messaging');
-				}
-			}
+			// move the spinner back to it's place
+			ajaxSpinner.attr('style', style);
+			ajaxSpinner.insertAfter('#messaging');
 		});
 	}
 }

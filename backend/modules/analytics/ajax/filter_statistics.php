@@ -21,57 +21,87 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 	{
 		parent::execute();
 
+		$result = array();
+
 		// get the data
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
 		$dashboardData = BackendAnalyticsModel::getDashboardData(array('pages'), $startTimestamp, $endTimestamp, true);
 
-		// make it highchart usable
+		// make it highchart usable & filter
 		$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData);
-
-		// apply the filter
 		$dashboardData = $this->filter($dashboardData);
 
-		// loop metrics
-		$metrics = array('pageviews');
-		$graphData = array();
-		foreach($metrics as $i => $metric)
+		// get parameters
+		$date = trim(SpoonFilter::getPostValue('date', null, '', 'string'));
+		$index = trim(SpoonFilter::getPostValue('index', null, '', 'string'));
+
+		// if no date was given we want graph data
+		if($date === '')
 		{
 			// build graph data array
-			$graphData[$i] = array();
-			$graphData[$i]['title'] = $metric;
-			$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
-			$graphData[$i]['i'] = $i + 1;
-			$graphData[$i]['data'] = array();
+			$result[0] = array();
+			$result[0]['title'] = 'pageviews';
+			$result[0]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase('pageviews')));
+			$result[0]['i'] = 1;
+			$result[0]['data'] = array();
 
 			// loop metrics per day
-			foreach($dashboardData as $j => $data)
+			foreach($dashboardData as $i => $data)
 			{
 				// cast SimpleXMLElement to array
 				$data = (array) $data;
 
 				// build array
-				$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-				$graphData[$i]['data'][$j]['value'] = (int) sizeof($data[$metric]);
+				$result[0]['data'][$i]['date'] = (int) $data['timestamp'];
+				$result[0]['data'][$i]['value'] = (int) sizeof($data['pageviews']);
 
 				// perform an extra check to determine if we counted the 'none...' row
-				foreach($data[$metric] as $pageview)
+				foreach($data['pageviews'] as $pageview)
 				{
 					if($pageview['url'] === 'none...')
 					{
-						$graphData[$i]['data'][$j]['value'] = 0;
+						$result[0]['data'][$i]['value'] = 0;
 					}
 				}
 			}
 		}
 
+		// if we have a date we want datagrid data
+		else
+		{
+			$timestamp = strtotime($date) + 46800; // add 13h to match google's dates
+
+			foreach($dashboardData as $dataItem)
+			{
+				//Spoon::dump($dataItem['timestamp'], false);
+
+				if((int) $dataItem['timestamp'] === (int) $timestamp)
+				{
+					// if there's an index we need datagrid details
+					if($index !== '')
+					{
+						$result = $dataItem['pages_info'][$index];
+					}
+
+					// if not we only need url's
+					else
+					{
+						foreach($dataItem['pageviews'] as $page)
+						{
+							array_push($result, $page['url']);
+						}
+					}
+				}
+			}
+		}
 
 		// return status
 		$this->output(
 				self::OK,
 				array(
 						'status' => 'success',
-						'data' => $graphData
+						'data' => $result
 				),
 				'Data has been retrieved.'
 		);
@@ -98,9 +128,12 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		if($browser === '') $this->output(self::BAD_REQUEST, null, BL::err('No browser filter provided.'));
 		if($browserVersion === '') $this->output(self::BAD_REQUEST, null, BL::err('No browser version provided.'));
 		if($isLoggedIn === '') $this->output(self::BAD_REQUEST, null, BL::err('No is logged in filter provided.'));
+		// $this->output(self::BAD_REQUEST, null, BL::err('No date provided.'));
+		//$timestamp = strtotime($date);
 
 		foreach($data as &$dataItem)
 		{
+			// filter
 			foreach($dataItem['pages_info'] as $i => $pageInfo)
 			{
 				// user logged in?
