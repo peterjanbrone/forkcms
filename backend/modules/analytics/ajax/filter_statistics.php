@@ -190,6 +190,10 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 			{
 				$dataItem['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
 			}
+
+			// make sure to re-index!
+			$dataItem['pageviews'] = array_values($dataItem['pageviews']);
+			$dataItem['pages_info'] = array_values($dataItem['pages_info']);
 		}
 
 		return $data;
