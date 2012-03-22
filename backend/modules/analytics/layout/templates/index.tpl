@@ -187,19 +187,19 @@
 								<div class=" heading">
 									<h3 id="pageNotFoundStatisticsDate">{$pageNotFoundStatisticsDate}</h3>
 								</div>
-								{option:missingPages}
+								{option:pageNotFoundStatisticsDataGrid}
 								<div id="pageNotFoundIndex" class="dataGridHolder">
 									<table class="dataGrid">
 										<tbody>
-											{iteration:missingPages.pageviews}
+											{iteration:pageNotFoundStatisticsDataGrid.pageviews}
 											<tr class="{cycle:'even':'odd'}">
-												<td data-index="{$missingPages.pageviews.index}">{$missingPages.pageviews.url}</td>
+												<td data-index="{$pageNotFoundStatisticsDataGrid.pageviews.index}">{$pageNotFoundStatisticsDataGrid.pageviews.url}</td>
 											</tr>
-											{/iteration:missingPages.pageviews}
+											{/iteration:pageNotFoundStatisticsDataGrid.pageviews}
 										</tbody>
 									</table>
 								</div>
-								{/option:missingPages}
+								{/option:pageNotFoundStatisticsDataGrid}
 							</div>
 							{/option:pageNotFoundStatisticsGraphData}
 							<div id="highChartsLink" class="buttonHolderRight">
