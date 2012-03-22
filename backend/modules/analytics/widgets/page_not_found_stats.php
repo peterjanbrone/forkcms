@@ -8,7 +8,7 @@
 */
 
 /**
- * @author Peter-Jan Brone <peterjan.brone@netlash.com>
+ * @author Peter-Jan Brone <peterjan.brone@wijs.be>
  */
 
 class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
@@ -85,27 +85,24 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 					if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
 				}
 			}
-		}
 
-		foreach($graphData as $metric)
-		{
-			foreach($metric['data'] as $data)
+			foreach($graphData as $metric)
 			{
-				// get the maximum value
-				if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
+				foreach($metric['data'] as $data)
+				{
+					// get the maximum value
+					if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
+				}
 			}
+
+			$this->tpl->assign('analyticsPageNotFoundStatisticsMaxYAxis', $maxYAxis);
+			$this->tpl->assign('analyticsPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
+			$this->tpl->assign('analyticsPageNotFoundStatisticsGraphData', $graphData);
+			$this->tpl->assign('analyticsPageNotFoundStatisticsDate', date("D j M", (int) $dashboardData[0]['timestamp']) . ' missing pages:');
+			$this->tpl->assign('missingPages', $dashboardData[0]);
 		}
 
-		$this->tpl->assign('analyticsPageNotFoundStatsStartDate', $startTimestamp);
-		$this->tpl->assign('analyticsPageNotFoundStatsEndDate', $endTimestamp);
-		$this->tpl->assign('analyticsPageNotFoundStatsMaxYAxis', $maxYAxis);
-		$this->tpl->assign('analyticsPageNotFoundStatsTickInterval', ($maxYAxis == 2 ? '1' : ''));
-		$this->tpl->assign('analyticsPageNotFoundStatsGraphData', $graphData);
-
-		// assign the date
-		$this->tpl->assign('pageNotFoundDate', date("D j M", (int) $dashboardData[0]['timestamp']) . ' missing pages:');
-
-		// assign first day data
-		if($dashboardData !== false) $this->tpl->assign('missingPages', $dashboardData[0]);
+		$this->tpl->assign('analyticsPageNotFoundStatisticsStartDate', $startTimestamp);
+		$this->tpl->assign('analyticsPageNotFoundStatisticsEndDate', $endTimestamp);
 	}
 }

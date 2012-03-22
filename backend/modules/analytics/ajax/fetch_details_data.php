@@ -8,9 +8,9 @@
  */
 
 /**
- * This edit-action will check the status using Ajax
+ * This edit-action will fetch the page not found statistics details of a single day
  *
- * @author Annelies Van Extergem <annelies.vanextergem@netlash.com>
+ * @author Peter-Jan Brone <peterjan.brone@wijs.be>
  */
 class BackendAnalyticsAjaxFetchDetailsData extends BackendBaseAJAXAction
 {
@@ -26,15 +26,15 @@ class BackendAnalyticsAjaxFetchDetailsData extends BackendBaseAJAXAction
 		$timestamp = trim(SpoonFilter::getPostValue('timestamp', null, '', 'string'));
 
 		// validate
-		if($index === '') $this->output(self::BAD_REQUEST, null, BL::err('SomethingWentWrong'));
-		if($timestamp === '') $this->output(self::BAD_REQUEST, null, BL::err('SomethingWentWrong'));
+		if($index === '') $this->output(self::BAD_REQUEST, null, BL::err('No index provided.'));
+		if($timestamp === '') $this->output(self::BAD_REQUEST, null, BL::err('No timestamp provided.'));
 
 		// get the data
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
 		$data = BackendAnalyticsModel::getDashboardData(array('pages'), $startTimestamp, $endTimestamp, true);
 
-		// filter the data
+		// make it highchart usable
 		$data = BackendAnalyticsModel::convertForHighchart($data);
 
 		// get the correct day
@@ -46,6 +46,7 @@ class BackendAnalyticsAjaxFetchDetailsData extends BackendBaseAJAXAction
 				$result = $dataItem['pages_info'][$index];
 			}
 		}
+
 		// return status
 		$this->output(
 				self::OK,

@@ -12,6 +12,7 @@
  *
  * @author Dieter Van den Eynde <dieter.vandeneynde@netlash.com>
  * @author Annelies Van Extergem <annelies.vanextergem@netlash.com>
+ * @author Peter-Jan Brone <peterjan.brone@wijs.be>
  */
 class BackendAnalyticsHelper
 {

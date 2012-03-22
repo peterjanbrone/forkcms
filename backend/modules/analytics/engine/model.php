@@ -12,6 +12,7 @@
  *
  * @author Annelies Van Extergem <annelies.vanextergem@netlash.com>
  * @author Dieter Van den Eynde <dieter.vandeneynde@netlash.com>
+ * @author Peter-Jan Brone <peterjan.brone@wijs.be>
  */
 class BackendAnalyticsModel
 {
@@ -90,103 +91,86 @@ class BackendAnalyticsModel
 	 */
 	public static function convertForHighchart($data)
 	{
-		// we need stats for 9 days so first build that empty array
-		$results = array();
-
-		// make a container array with each day, regardless if there's any data for that day
-		$startTimestamp = strtotime('-1 week -1 days', mktime(13, 0, 0));
+		// build an empty container array with 9 days
+		$highchartData = array();
+		$startTimestamp = strtotime('-1 week -1 days', mktime(13, 0, 0)); // add 13h so it matches google dates
 		for($i = 0; $i < 9; $i++)
 		{
-			$results[$i] = array();
-			$results[$i]['timestamp'] = (int) $startTimestamp + ($i * 86400); // add 46800 so it matches google dates
-			$results[$i]['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
-			$results[$i]['pages_info'] = array();
+			$highchartData[$i] = array();
+			$highchartData[$i]['timestamp'] = (int) $startTimestamp + ($i * 86400);
+			$highchartData[$i]['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
+			$highchartData[$i]['pages_info'] = array();
 		}
 
-
-		// filter the data
-		$filteredData = array();
-
-		// get the first day
-		$timestamp = $data[0]['timestamp'];
-
-		// loop all data
+		// convert the data
 		$index = 0;
-		for($i = 0; $i < count($data); $i)
+		$convertedData = array();
+		$currentDay = $data[0]['timestamp'];
+		for($i = 0; $i < sizeof($data); $i)
 		{
 			// init the arrays
-			$filteredData[$index]['timestamp'] = $data[$i]['timestamp'];
-			$filteredData[$index]['pageviews'] = array();
-			$filteredData[$index]["pages_info"] = array();
+			$convertedData[$index]['timestamp'] = $data[$i]['timestamp'];
+			$convertedData[$index]['pageviews'] = array();
+			$convertedData[$index]["pages_info"] = array();
 
 			// collect all data for that day
 			$counter = 0;
-			while($data[$i + $counter]['timestamp'] === $timestamp)
+			while($data[$i]['timestamp'] === $currentDay)
 			{
-				// get the missing page url
-				$url = $data[$i + $counter]['pagePath'];
+				$url = $data[$i]['pagePath'];
 
-				// too long to display?
+				// too long to display? make it shorter
 				if(strlen($url) > 40)
 				{
-					// cut off at the '?'
 					$parts = explode('?', $url);
 					$url = $parts[0] . '?';
 
-					// still too long?
-					if(strlen($url) > 40)
-					{
-						$url = substr((string) $url, 0, 39);
-					}
+					if(strlen($url) > 40) $url = substr((string) $url, 0, 39);
 
-					// indicate it's been cut off
 					$url .= '...';
 				}
 
 				// store index and url
-				array_push($filteredData[$index]['pageviews'], array('index' => $i + $counter, 'url' => $url));
+				array_push($convertedData[$index]['pageviews'], array('index' => $i, 'url' => $url));
 
 				// store all other info
-				array_push($filteredData[$index]['pages_info'], array(
-						'full_url' => $data[$i + $counter]['pagePath'],
-						'unique_pageviews' => $data[$i + $counter]['uniquePageviews'],
-						'pageviews' => $data[$i + $counter]['pageviews'],
-						'browser' => $data[$i + $counter]['browser'],
-						'browser_version' => $data[$i + $counter]['browserVersion'],
-						'extension' => $data[$i + $counter]['customVarValue1'],
-						'is_logged_in' => $data[$i + $counter]['customVarValue2'],
-						'caller_is_action' => $data[$i + $counter]['customVarValue3']
+				array_push($convertedData[$index]['pages_info'], array(
+						'full_url' => $data[$i]['pagePath'],
+						'unique_pageviews' => $data[$i]['uniquePageviews'],
+						'pageviews' => $data[$i]['pageviews'],
+						'browser' => $data[$i]['browser'],
+						'browser_version' => $data[$i]['browserVersion'],
+						'extension' => $data[$i]['customVarValue1'],
+						'is_logged_in' => $data[$i]['customVarValue2'],
+						'caller_is_action' => $data[$i]['customVarValue3']
 				));
 
-				$counter++;
+				$i++;
 
 				// break if index gets too big
-				if($i + $counter === count($data)) break;
+				if($i === sizeof($data)) break 2;
 			}
 
-			// get the new day
-			if($i + $counter < count($data)) $timestamp = $data[$i + $counter]['timestamp'];
+			$currentDay = $data[$i]['timestamp'];
 
-			// make sure all counters get updated
-			$i += $counter;
 			$index++;
 		}
 
-		// insert the filtered data into the results array
-		for($i = 0; $i < count($results); $i++)
+		// filter converted data into the highchartdata array
+		for($i = 0; $i < sizeof($highchartData); $i++)
 		{
-			for($j = 0; $j < count($filteredData); $j++)
+			for($j = 0; $j < sizeof($convertedData); $j++)
 			{
 				// insert if the dates match
-				if((int) $results[$i]['timestamp'] == (int) $filteredData[$j]['timestamp'])
+				if((int) $highchartData[$i]['timestamp'] == (int) $convertedData[$j]['timestamp'])
 				{
-					$results[$i]['pageviews'] = (array) $filteredData[$j]['pageviews'];
-					$results[$i]['pages_info'] = (array) $filteredData[$j]['pages_info'];
+					$highchartData[$i]['pageviews'] = (array) $convertedData[$j]['pageviews'];
+					$highchartData[$i]['pages_info'] = (array) $convertedData[$j]['pages_info'];
 				}
 			}
 		}
 
-		return $results;
+		return $highchartData;
 	}
 
 	/**

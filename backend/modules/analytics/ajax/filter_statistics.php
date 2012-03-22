@@ -8,7 +8,7 @@
  */
 
 /**
- * This Ajax action will filter the page not found statistics
+ * This edit action will filter the page not found statistics
  *
  * @author Peter-Jan Brone <peterjan.brone@wijs.be>
  */
@@ -26,7 +26,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		$endTimestamp = mktime(0, 0, 0);
 		$dashboardData = BackendAnalyticsModel::getDashboardData(array('pages'), $startTimestamp, $endTimestamp, true);
 
-		// make highchart usable
+		// make it highchart usable
 		$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData);
 
 		// apply the filter
@@ -52,7 +52,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 
 				// build array
 				$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-				$graphData[$i]['data'][$j]['value'] = (int) count($data[$metric]);
+				$graphData[$i]['data'][$j]['value'] = (int) sizeof($data[$metric]);
 
 				// perform an extra check to determine if we counted the 'none...' row
 				foreach($data[$metric] as $pageview)
@@ -92,14 +92,21 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		$browserVersion = trim(SpoonFilter::getPostValue('browserVersion', null, '', 'string'));
 		$isLoggedIn = trim(SpoonFilter::getPostValue('isLoggedIn', null, '', 'string'));
 
+		// validate
+		if($callerIsAction === '') $this->output(self::BAD_REQUEST, null, BL::err('No caller is action filter provided.'));
+		if($extension === '') $this->output(self::BAD_REQUEST, null, BL::err('No extension filter provided.'));
+		if($browser === '') $this->output(self::BAD_REQUEST, null, BL::err('No browser filter provided.'));
+		if($browserVersion === '') $this->output(self::BAD_REQUEST, null, BL::err('No browser version provided.'));
+		if($isLoggedIn === '') $this->output(self::BAD_REQUEST, null, BL::err('No is logged in filter provided.'));
+
 		foreach($data as &$dataItem)
 		{
 			foreach($dataItem['pages_info'] as $i => $pageInfo)
 			{
 				// user logged in?
-				if($isLoggedIn === 'checked')
+				if($isLoggedIn !== 'false')
 				{
-					if($pageInfo['is_logged_in'] === 'no')
+					if($pageInfo['is_logged_in'] !== 'yes')
 					{
 						unset($dataItem['pages_info'][$i]);
 						unset($dataItem['pageviews'][$i]);
@@ -108,7 +115,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 				}
 
 				// caller is action?
-				if($callerIsAction === 'checked')
+				if($callerIsAction !== 'false')
 				{
 					if($pageInfo['caller_is_action'] !== 'yes')
 					{

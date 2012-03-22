@@ -120,87 +120,87 @@
 							</div>
 						</div>
 						<div class="options">
-							{option:pageNotFoundStatisticsGraphData}
-								<div id="dataChartPageNotFoundStatistics" class="hidden">
-									<span id="chartPageNotFoundStatisticsMaxYAxis">{$chartPageNotFoundStatisticsMaxYAxis}</span>
-									<span id="chartPageNotFoundStatisticsTickInterval">{$chartPageNotFoundStatisticsTickInterval}</span>
-									<span id="chartPageNotFoundStatisticsYAxisTitle">{$lblPageviews|ucfirst}</span>
-									<ul class="series">
-										{iteration:pageNotFoundStatisticsGraphData}
-											<li class="serie" id="metric{$pageNotFoundStatisticsGraphData.i}serie">
-												<span class="name">{$pageNotFoundStatisticsGraphData.label}</span>
-												<ul class="data">
-													{iteration:pageNotFoundStatisticsGraphData.data}
-														<li>
-															<span class="fulldate">{$pageNotFoundStatisticsGraphData.data.date|date:'D d M':{$INTERFACE_LANGUAGE}|ucwords}</span>
-															<span class="date">{$pageNotFoundStatisticsGraphData.data.date|date:'d M':{$INTERFACE_LANGUAGE}|ucwords}</span>
-															<span class="value">{$pageNotFoundStatisticsGraphData.data.value}</span>
-														</li>
-													{/iteration:pageNotFoundStatisticsGraphData.data}
-												</ul>
-											</li>
-										{/iteration:pageNotFoundStatisticsGraphData}
-									</ul>
+						{option:pageNotFoundStatisticsGraphData}
+							<div id="dataChartPageNotFoundStatistics" class="hidden">
+								<span id="chartPageNotFoundStatisticsMaxYAxis">{$chartPageNotFoundStatisticsMaxYAxis}</span>
+								<span id="chartPageNotFoundStatisticsTickInterval">{$chartPageNotFoundStatisticsTickInterval}</span>
+								<span id="chartPageNotFoundStatisticsYAxisTitle">{$lblPageviews|ucfirst}</span>
+								<ul class="series">
+									{iteration:pageNotFoundStatisticsGraphData}
+										<li class="serie" id="metric{$pageNotFoundStatisticsGraphData.i}serie">
+											<span class="name">{$pageNotFoundStatisticsGraphData.label}</span>
+											<ul class="data">
+												{iteration:pageNotFoundStatisticsGraphData.data}
+													<li>
+														<span class="fulldate">{$pageNotFoundStatisticsGraphData.data.date|date:'D d M':{$INTERFACE_LANGUAGE}|ucwords}</span>
+														<span class="date">{$pageNotFoundStatisticsGraphData.data.date|date:'d M':{$INTERFACE_LANGUAGE}|ucwords}</span>
+														<span class="value">{$pageNotFoundStatisticsGraphData.data.value}</span>
+													</li>
+												{/iteration:pageNotFoundStatisticsGraphData.data}
+											</ul>
+										</li>
+									{/iteration:pageNotFoundStatisticsGraphData}
+								</ul>
+							</div>
+
+							<div id="chartPageNotFoundStatistics">&nbsp;</div>
+
+							<div id="pageNotFoundStatisticsFilter">
+								<h4>Filter:</h4>
+								<span>
+								<p>user logged in:</p>
+								<input type=checkbox name="user_logged_in" id="isLoggedIn"/>
+
+								<p>caller is action:</p>
+								<input type=checkbox name="caller_is_action" id="callerIsAction"/>
+
+								{option:filterExtension}
+								<p>extension:</p>
+								<select id="extension">
+									{iteration:filterExtension}
+									<option>{$filterExtension.name}</option>
+									{/iteration:filterExtension}
+								</select>
+								{/option:filterExtension}
+
+								{option:filterBrowser}
+								<p>browser:</p>
+								<select id="browser">
+									{iteration:filterBrowser}
+									<option>{$filterBrowser.name}</option>
+									{/iteration:filterBrowser}
+								</select>
+								{/option:filterBrowser}
+
+								{option:filterBrowserVersion}
+								<p>version:</p>
+								<select id="browserVersion">
+									{iteration:filterBrowserVersion}
+									<option>{$filterBrowserVersion.versionId}</option>
+									{/iteration:filterBrowserVersion}
+								</select>
+								{/option:filterBrowserVersion}
+								</span>
+							</div>
+
+							<div id="dataGridPageNotFoundStatistics" class="boxLevel2">
+								<div class=" heading">
+									<h3 id="pageNotFoundStatisticsDate">{$pageNotFoundStatisticsDate}</h3>
 								</div>
-
-								<div id="chartPageNotFoundStatistics">&nbsp;</div>
-
-								<div id="pageNotFoundStatisticsFilter">
-									<h4>Filter:</h4>
-									<span>
-									<p>user logged in:</p>
-									<input type=checkbox name="user_logged_in" id="isLoggedIn"/>
-
-									<p>caller is action:</p>
-									<input type=checkbox name="caller_is_action" id="callerIsAction"/>
-
-									{option:filterExtension}
-									<p>extension:</p>
-									<select id="extension">
-										{iteration:filterExtension}
-										<option>{$filterExtension.name}</option>
-										{/iteration:filterExtension}
-									</select>
-									{/option:filterExtension}
-
-									{option:filterBrowser}
-									<p>browser:</p>
-									<select id="browser">
-										{iteration:filterBrowser}
-										<option>{$filterBrowser.name}</option>
-										{/iteration:filterBrowser}
-									</select>
-									{/option:filterBrowser}
-
-									{option:filterBrowserVersion}
-									<p>version:</p>
-									<select id="browserVersion">
-										{iteration:filterBrowserVersion}
-										<option>{$filterBrowserVersion.versionId}</option>
-										{/iteration:filterBrowserVersion}
-									</select>
-									{/option:filterBrowserVersion}
-									</span>
+								{option:missingPages}
+								<div id="pageNotFoundIndex" class="dataGridHolder">
+									<table class="dataGrid">
+										<tbody>
+											{iteration:missingPages.pageviews}
+											<tr class="{cycle:'even':'odd'}">
+												<td data-index="{$missingPages.pageviews.index}">{$missingPages.pageviews.url}</td>
+											</tr>
+											{/iteration:missingPages.pageviews}
+										</tbody>
+									</table>
 								</div>
-
-								<div id="dataGridPageNotFoundStatistics" class="boxLevel2">
-									<div class=" heading">
-										<h3 id="pageNotFoundDate">{$pageNotFoundDate}</h3>
-									</div>
-									{option:missingPages}
-									<div id="pageNotFoundIndex" class="dataGridHolder">
-										<table class="dataGrid">
-											<tbody>
-												{iteration:missingPages.pageviews}
-												<tr class="{cycle:'even':'odd'}">
-													<td data-index="{$missingPages.pageviews.index}">{$missingPages.pageviews.url}</td>
-												</tr>
-												{/iteration:missingPages.pageviews}
-											</tbody>
-										</table>
-									</div>
-									{/option:missingPages}
-								</div>
+								{/option:missingPages}
+							</div>
 							{/option:pageNotFoundStatisticsGraphData}
 							<div id="highChartsLink" class="buttonHolderRight">
 								<a href="http://highcharts.com/" class="analyticsBacklink">Highcharts</a>

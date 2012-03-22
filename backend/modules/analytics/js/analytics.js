@@ -329,8 +329,15 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 
 	init: function()
 	{
-		if($chartPageNotFoundStatistics.length > 0) { jsBackend.analytics.chartPageNotFoundStatistics.create(); }
+		if($chartPageNotFoundStatistics.length > 0)
+		{
+			jsBackend.analytics.chartPageNotFoundStatistics.create();
+			jsBackend.analytics.chartPageNotFoundStatistics.bind();
+		}
+	},
 
+	bind: function()
+	{
 		// show day details when clicking on a chart node
 		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
 
@@ -393,8 +400,15 @@ jsBackend.analytics.chartWidgetPageNotFoundStatistics =
 
 	init: function()
 	{
-		if($chartWidgetPageNotFoundStatistics.length > 0) { jsBackend.analytics.chartWidgetPageNotFoundStatistics.create(); }
+		if($chartWidgetPageNotFoundStatistics.length > 0)
+		{
+			jsBackend.analytics.chartWidgetPageNotFoundStatistics.create();
+			jsBackend.analytics.chartWidgetPageNotFoundStatistics.bind();
+		}
+	},
 
+	bind: function()
+	{
 		// show day details when clicking on a chart node
 		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
 
@@ -471,7 +485,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 	filter: function()
 	{
 		// calculate the timestamp
-		var headerDate = $('#pageNotFoundDate').text();
+		var headerDate = $('#pageNotFoundStatisticsDate').text();
 		var dateString = headerDate.replace('missing pages:', '');
 
 		// append the year and get the unix timestamp
@@ -485,8 +499,8 @@ jsBackend.analytics.pageNotFoundStatistics =
 			{
 				fork: { action: 'filter_statistics' , module: 'analytics'},
 				timestamp: timestamp,
-				isLoggedIn: $filterIsLoggedIn.attr('checked'),
-				callerIsAction: $filterCallerIsAction.attr('checked'),
+				isLoggedIn: $filterIsLoggedIn.is(':checked'),
+				callerIsAction: $filterCallerIsAction.is(':checked'),
 				extension: $filterExtension.val(),
 				browser: $filterBrowser.val(),
 				browserVersion: $filterBrowserVersion.val()
@@ -523,10 +537,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 					}
 
 					// set max Y and tick interval
-					$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis);
-					(maxYAxis == 2)
-						? $('#chartPageNotFoundStatisticsTickInterval').html('1')
-						: $('#chartPageNotFoundStatisticsTickInterval').html('');
+					$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis.toString());
 
 					// init to re-bind all event listeners
 					jsBackend.analytics.chartPageNotFoundStatistics.init();
@@ -560,19 +571,19 @@ jsBackend.analytics.pageNotFoundStatistics =
 		}
 
 		// check if we even need to refresh
-		if($('#pageNotFoundDate').text() === dateString + ' missing pages:') return;
+		if($('#pageNotFoundStatisticsDate').text() === dateString + ' missing pages:') return;
 
 		// collapse the datagrid
 		$('#pageNotFoundIndex').slideUp('medium', function() {});
 
 		// reset the date
-		$('#pageNotFoundDate').text(dateString + ' missing pages:');
+		$('#pageNotFoundStatisticsDate').text(dateString + ' missing pages:');
 
 		// move the spinner !
 		var ajaxSpinner = $('#ajaxSpinner');
 		var style = ajaxSpinner.attr('style');
 		ajaxSpinner.remove();
-		ajaxSpinner.insertAfter('#pageNotFoundDate');
+		ajaxSpinner.insertAfter('#pageNotFoundStatisticsDate');
 		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
 
 		// call to refresh the grid
@@ -626,6 +637,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 
 	toggleDetails: function(e)
 	{
+
 		// get the row index
 		var index = e.currentTarget.attributes[0].nodeValue;
 
@@ -648,11 +660,11 @@ jsBackend.analytics.pageNotFoundStatistics =
 		var ajaxSpinner = $('#ajaxSpinner');
 		var style = ajaxSpinner.attr('style');
 		ajaxSpinner.remove();
-		ajaxSpinner.insertAfter('#pageNotFoundDate');
+		ajaxSpinner.insertAfter('#pageNotFoundStatisticsDate');
 		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
 
 		// get the timestamp
-		var dateString = $('#pageNotFoundDate').text().replace('missing pages:', '');
+		var dateString = $('#pageNotFoundStatisticsDate').text().replace('missing pages:', '');
 
 		// append the year and get the unix timestamp
 		var year = new Date().getFullYear(); // we can't use Date.Now() cause of IE8
@@ -693,7 +705,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 					html += '</div>';
 
 					// insert the details
-					$(html).insertAfter(row).slideDown("slow");
+					$(html).insertAfter(row).slideDown("medium");
 
 					// move the spinner back to it's place
 					ajaxSpinner.attr('style', style);
@@ -860,11 +872,13 @@ jsBackend.analytics.resize =
 			{
 				$chartPageNotFoundStatistics.html('&nbsp;');
 				jsBackend.analytics.chartPageNotFoundStatistics.create();
+				jsBackend.analytics.chartPageNotFoundStatistics.bind();
 			}
 			if($chartWidgetPageNotFoundStatistics.length > 0)
 			{
 				$chartWidgetPageNotFoundStatistics.html('&nbsp;');
 				jsBackend.analytics.chartWidgetPageNotFoundStatistics.create();
+				jsBackend.analytics.chartWidgetPageNotFoundStatistics.bind();
 			}
 		}
 	}

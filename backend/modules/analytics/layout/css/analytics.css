@@ -141,19 +141,19 @@
 
 #dataGridPageNotFoundStatistics {
 	clear: both;
-	padding-top: 20px;
+	padding-top: 24px;
 }
 
 #pageNotFoundStatisticsFilter {
 	position: absolute;
-	top: 24px;
+	top: 18px;
 	right: 12px;
 	width: 200px;
 }
 
 #pageNotFoundStatisticsFilter span{
 	position: relative;
-	top: -3px;
+	top: -2px;
 	display: block;
 	width: 174px;
 	height: 153px;

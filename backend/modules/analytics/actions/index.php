@@ -12,6 +12,7 @@
  *
  * @author Annelies Van Extergem <annelies.vanextergem@netlash.com>
  * @author Dieter Vanden Eynde <dieter.vandeneynde@netlash.com>
+ * @author Peter-Jan Brone <peterjan.brone@wijs.be>
  */
 class BackendAnalyticsIndex extends BackendAnalyticsBase
 {
@@ -221,7 +222,6 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 	 */
 	private function parsePageNotFoundStatistics()
 	{
-		$maxYAxis = 2;
 		$metrics = array('pageviews');
 		$graphData = array();
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
@@ -230,7 +230,6 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		// get the data
 		$statistics = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp, true);
 
-		// there are some metrics
 		if($statistics !== false)
 		{
 			// make the data highchart usable
@@ -262,6 +261,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 			}
 
 			// get the maximum value
+			$maxYAxis = 2;
 			foreach($graphData as $metric)
 			{
 				foreach($metric['data'] as $data)
@@ -270,7 +270,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 				}
 			}
 
-			// get filter data
+			// collect all browsers, versions and extensions
 			$browsers = array();
 			$extensions = array(array('name' => '-'));
 			foreach($statistics as $stat)
@@ -297,7 +297,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 				}
 			}
 
-			// make it datagrid usable
+			// construct 2 arrays suited for iteration
 			$filterBrowser = array(array('name' => '-'));
 			$filterBrowserVersion = array(array('versionId' => '-'));
 			foreach($browsers as $browser)
@@ -314,14 +314,8 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
 		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
 		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
-
-		// assign the date
-		$this->tpl->assign('pageNotFoundDate', date("D j M", (int) $statistics[0]['timestamp']) . ' missing pages:');
-
-		// assign the datagrid data
+		$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']) . ' missing pages:');
 		$this->tpl->assign('missingPages', $statistics[0]);
-
-		// assign the filter data
 		$this->tpl->assign('filterBrowser', $filterBrowser);
 		$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
 		$this->tpl->assign('filterExtension', $extensions);
