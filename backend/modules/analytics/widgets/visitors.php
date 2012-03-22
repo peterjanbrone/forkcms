@@ -50,38 +50,31 @@ class BackendAnalyticsWidgetVisitors extends BackendBaseWidget
 		$graphData = array();
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
+		$metricsPerDay = BackendAnalyticsModel::getMetricsPerDay($metrics, $startTimestamp, $endTimestamp);
 
-		// get dashboard data
-		$dashboardData = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp, true);
-
-		// there are some metrics
-		if($dashboardData !== false)
+		foreach($metrics as $i => $metric)
 		{
-			// loop metrics
-			foreach($metrics as $i => $metric)
+			// build graph data array
+			$graphData[$i] = array();
+			$graphData[$i]['title'] = $metric;
+			$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
+			$graphData[$i]['i'] = $i + 1;
+			$graphData[$i]['data'] = array();
+
+			foreach($metricsPerDay as $j => $data)
 			{
-				// build graph data array
-				$graphData[$i] = array();
-				$graphData[$i]['title'] = $metric;
-				$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
-				$graphData[$i]['i'] = $i + 1;
-				$graphData[$i]['data'] = array();
+				// cast SimpleXMLElement to array
+				$data = (array) $data;
 
-				// loop metrics per day
-				foreach($dashboardData as $j => $data)
-				{
-					// cast SimpleXMLElement to array
-					$data = (array) $data;
-
-					// build array
-					$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-					$graphData[$i]['data'][$j]['value'] = (string) $data[$metric];
-				}
+				// build array
+				$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
+				$graphData[$i]['data'][$j]['value'] = (string) $data[$metric];
 			}
 		}
 
 		foreach($graphData as $metric)
 		{
+			// loop the data
 			foreach($metric['data'] as $data)
 			{
 				// get the maximum value
@@ -91,7 +84,6 @@ class BackendAnalyticsWidgetVisitors extends BackendBaseWidget
 
 		$this->tpl->assign('analyticsRecentVisitsStartDate', $startTimestamp);
 		$this->tpl->assign('analyticsRecentVisitsEndDate', $endTimestamp);
-		$this->tpl->assign('analyticsMaxYAxis', $maxYAxis);
 		$this->tpl->assign('analyticsMaxYAxis', $maxYAxis);
 		$this->tpl->assign('analyticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
 		$this->tpl->assign('analyticsGraphData', $graphData);
