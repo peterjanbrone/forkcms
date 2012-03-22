@@ -70,12 +70,11 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		// if we have a date we want datagrid data
 		else
 		{
-			$timestamp = strtotime($date) + 46800; // add 13h to match google's dates
+
+			$timestamp = strtotime($date . '+ 13 hours'); // add 13h to match google's dates
 
 			foreach($dashboardData as $dataItem)
 			{
-				//Spoon::dump($dataItem['timestamp'], false);
-
 				if((int) $dataItem['timestamp'] === (int) $timestamp)
 				{
 					// if there's an index we need datagrid details
@@ -122,14 +121,8 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		$browserVersion = trim(SpoonFilter::getPostValue('browserVersion', null, '', 'string'));
 		$isLoggedIn = trim(SpoonFilter::getPostValue('isLoggedIn', null, '', 'string'));
 
-		// validate
-		if($callerIsAction === '') $this->output(self::BAD_REQUEST, null, BL::err('No caller is action filter provided.'));
-		if($extension === '') $this->output(self::BAD_REQUEST, null, BL::err('No extension filter provided.'));
-		if($browser === '') $this->output(self::BAD_REQUEST, null, BL::err('No browser filter provided.'));
-		if($browserVersion === '') $this->output(self::BAD_REQUEST, null, BL::err('No browser version provided.'));
-		if($isLoggedIn === '') $this->output(self::BAD_REQUEST, null, BL::err('No is logged in filter provided.'));
-		// $this->output(self::BAD_REQUEST, null, BL::err('No date provided.'));
-		//$timestamp = strtotime($date);
+		// dont filter if the extension is empty, this means the call originated from the dashboard
+		if($extension === '') return $data;
 
 		foreach($data as &$dataItem)
 		{
