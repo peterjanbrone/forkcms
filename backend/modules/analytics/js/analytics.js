@@ -39,7 +39,7 @@ jsBackend.analytics.charts =
 {
 	init: function()
 	{
-		if($chartPieChart.length > 0 || $chartDoubleMetricPerDay.length > 0 || $chartSingleMetricPerDay.length > 0 || $chartWidget.length > 0 || $chartWidgetPageNotFoundStatistics.length > 0)
+		if($chartPieChart.length > 0 || $chartDoubleMetricPerDay.length > 0 || $chartSingleMetricPerDay.length > 0 || $chartWidget.length > 0 || $chartPageNotFoundStatistics.length > 0)
 		{
 			Highcharts.setOptions(
 			{
