@@ -130,39 +130,6 @@ class BackendAnalyticsCronjobGetData extends BackendBaseCronjob
 			// nothing in cache - fetch from google and set cache
 			if(!isset($data['dashboard_data']))
 			{
-				/*
-				$dashboardData = BackendAnalyticsHelper::getDashboardData($startTimestamp, $endTimestamp);
-				$pageNotFoundStatistics = BackendAnalyticsHelper::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
-
-				// insert page not found statistics into dashboard data
-				foreach($dashboardData as &$dbDataItem)
-				{
-					// set inital values
-					$dbDataItem['uniquePageviews'] = 0;
-					$dbDataItem['pagePath'] = '';
-					$dbDataItem['browser'] = '';
-					$dbDataItem['browserVersion'] = '';
-					$dbDataItem['customVarValue1'] = '';
-					$dbDataItem['customVarValue2'] = '';
-					$dbDataItem['customVarValue3'] = '';
-
-					foreach($pageNotFoundStatistics as &$pnfDataItem)
-					{
-						// insert if timestamps are equal (subtract 10h)
-						if((int) $dbDataItem['timestamp'] === (((int) ($pnfDataItem['timestamp'])) - 10 * 60 * 60))
-						{
-							$dbDataItem['uniquePageviews'] = $pnfDataItem['uniquePageviews'];
-							$dbDataItem['pagePath'] = $pnfDataItem['pagePath'];
-							$dbDataItem['browser'] = $pnfDataItem['browser'];
-							$dbDataItem['browserVersion'] = $pnfDataItem['browserVersion'];
-							$dbDataItem['customVarValue1'] = $pnfDataItem['customVarValue1'];
-							$dbDataItem['customVarValue2'] = $pnfDataItem['customVarValue1'];
-							$dbDataItem['customVarValue3'] = $pnfDataItem['customVarValue1'];
-						}
-					}
-				}
-				*/
-
 				$data['dashboard_data']['entries'] = BackendAnalyticsHelper::getDashboardData($startTimestamp, $endTimestamp);
 			}
 

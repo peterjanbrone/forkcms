@@ -66,7 +66,13 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 				// make sure to take the most recent file
 				if((int) $fileTimestamps[1] > (int) $timestamps[1])
 				{
-					$timestamps = $fileTimestamps;
+					// make sure it contains the data we want
+					$start = strtotime('-1 week -1 days', mktime(0, 0, 0));
+					$end = mktime(0, 0, 0);
+					if(((int) $fileTimestamps[0] < (int) $start) && ((int) $fileTimestamps[1] > (int) $end))
+					{
+						$timestamps = $fileTimestamps;
+					}
 				}
 			}
 		}
@@ -79,6 +85,10 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		if($startTimestamp !== 0)
 		{
 			$dashboardData = BackendAnalyticsModel::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
+		}
+		else
+		{
+			$dashboardData = BackendAnalyticsHelper::getPageNotFoundStatistics(strtotime('-1 week -1 days', mktime(0, 0, 0)), mktime(0, 0, 0));
 		}
 
 		// there are some metrics
