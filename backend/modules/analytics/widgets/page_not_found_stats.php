@@ -69,7 +69,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 					// make sure it contains the data we want
 					$start = strtotime('-1 week -1 days', mktime(0, 0, 0));
 					$end = mktime(0, 0, 0);
-					if(((int) $fileTimestamps[0] < (int) $start) && ((int) $fileTimestamps[1] > (int) $end))
+					if(((int) $fileTimestamps[0] <= (int) $start) && ((int) $fileTimestamps[1] >= (int) $end))
 					{
 						$timestamps = $fileTimestamps;
 					}
@@ -85,6 +85,9 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		if($startTimestamp !== 0)
 		{
 			$dashboardData = BackendAnalyticsModel::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
+
+			// perform an extra check because sometimes the cached xml has the perfect dates, but doesn't contain any page not found statistics
+			if(!$dashboardData) $dashboardData = BackendAnalyticsHelper::getPageNotFoundStatistics(strtotime('-1 week -1 days', mktime(0, 0, 0)), mktime(0, 0, 0));
 		}
 		else
 		{
@@ -138,7 +141,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 			$this->tpl->assign('pageNotFoundStatisticsDataGrid', $dashboardData[0]);
 		}
 
-		$this->tpl->assign('analyticsPageNotFoundStatisticsStartDate', $startTimestamp);
-		$this->tpl->assign('analyticsPageNotFoundStatisticsEndDate', $endTimestamp);
+		$this->tpl->assign('analyticsPageNotFoundStatisticsStartDate', strtotime('-1 week -1 days', mktime(0, 0, 0)));
+		$this->tpl->assign('analyticsPageNotFoundStatisticsEndDate', mktime(0, 0, 0));
 	}
 }
