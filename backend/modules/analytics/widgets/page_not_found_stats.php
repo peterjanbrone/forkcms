@@ -80,15 +80,6 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 			$dashboardData = BackendAnalyticsModel::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
 		}
 
-		// no appropriate cache file? -> make it ourselves
-		else
-		{
-			$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
-			$endTimestamp = mktime(0, 0, 0);
-			$dashboardData = BackendAnalyticsHelper::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
-			BackendAnalyticsModel::writeCacheFile($dashboardData, $startTimestamp, $endTimestamp);
-		}
-
 		// there are some metrics
 		if($dashboardData !== false && !empty($dashboardData))
 		{
