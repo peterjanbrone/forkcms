@@ -46,7 +46,6 @@ class PagesInstaller extends ModuleInstaller
 			'N',
 			2
 		);
-		$extras['sitemap_widget_sitemap'] = $this->insertExtra('pages', 'widget', 'Tracker', 'tracker', null, 'N', 3);
 
 		// loop languages
 		foreach($this->getLanguages() as $language)
