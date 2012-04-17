@@ -27,7 +27,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$this->tpl->assign('analyticsValidSettings', true);
 
 		$this->setColumn('middle');
-		$this->setPosition(3);
+		$this->setPosition(2);
 
 		// add css
 		$this->header->addCSS('widgets.css', 'analytics');
@@ -53,13 +53,13 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$endTimestamp = mktime(0, 0, 0);
 
 		// get dashboard data
-		$dashboardData = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp, true);
+		$dashboardData = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp);
 
 		// there are some metrics
-		if($dashboardData !== false)
+		if($dashboardData !== false && !empty($dashboardData))
 		{
 			// make the data highchart usable
-			$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData);
+			$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData, $startTimestamp, $endTimestamp);
 
 			// loop metrics
 			foreach($metrics as $i => $metric)
@@ -82,15 +82,15 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 					$graphData[$i]['data'][$j]['value'] = (int) count($data[$metric]);
 
 					// perform an extra check to determine if we counted the 'none...' row
-					if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
+					// if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
 				}
 			}
 
+			// get the maximum Y value
 			foreach($graphData as $metric)
 			{
 				foreach($metric['data'] as $data)
 				{
-					// get the maximum value
 					if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
 				}
 			}

@@ -122,6 +122,8 @@
 						<div class="options">
 						{option:pageNotFoundStatisticsGraphData}
 							<div id="dataChartPageNotFoundStatistics" class="hidden">
+								<span id="startTimestamp">{$chartPageNotFoundStatisticsStartDate}</span>
+								<span id="endTimestamp">{$chartPageNotFoundStatisticsEndDate}</span>
 								<span id="chartPageNotFoundStatisticsMaxYAxis">{$chartPageNotFoundStatisticsMaxYAxis}</span>
 								<span id="chartPageNotFoundStatisticsTickInterval">{$chartPageNotFoundStatisticsTickInterval}</span>
 								<span id="chartPageNotFoundStatisticsYAxisTitle">{$lblPageviews|ucfirst}</span>

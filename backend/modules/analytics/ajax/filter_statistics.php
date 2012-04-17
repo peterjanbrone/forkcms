@@ -23,14 +23,16 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 
 		$result = array();
 
-		// get the data
-		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
-		$endTimestamp = mktime(0, 0, 0);
-		$dashboardData = BackendAnalyticsModel::getDashboardData(array('pages'), $startTimestamp, $endTimestamp, true);
+		// get timestamps
+		$startTimestamp = trim(SpoonFilter::getPostValue('startTimestamp', null, '', 'int'));
+		$endTimestamp = trim(SpoonFilter::getPostValue('endTimestamp', null, '', 'int'));
+
+		// fetch the data
+		$data = BackendAnalyticsModel::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
 
 		// make it highchart usable & filter
-		$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData);
-		$dashboardData = $this->filter($dashboardData);
+		$data = BackendAnalyticsModel::convertForHighchart($data, $startTimestamp, $endTimestamp);
+		$data = $this->filter($data);
 
 		// get parameters
 		$date = trim(SpoonFilter::getPostValue('date', null, '', 'string'));
@@ -47,7 +49,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 			$result[0]['data'] = array();
 
 			// loop metrics per day
-			foreach($dashboardData as $i => $data)
+			foreach($data as $i => $data)
 			{
 				// cast SimpleXMLElement to array
 				$data = (array) $data;
@@ -70,10 +72,9 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		// if we have a date we want datagrid data
 		else
 		{
+			$timestamp = strtotime($date); // add 13h to match google's dates
 
-			$timestamp = strtotime($date . '+ 13 hours'); // add 13h to match google's dates
-
-			foreach($dashboardData as $dataItem)
+			foreach($data as $dataItem)
 			{
 				if((int) $dataItem['timestamp'] === (int) $timestamp)
 				{
@@ -97,12 +98,12 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 
 		// return status
 		$this->output(
-				self::OK,
-				array(
-						'status' => 'success',
-						'data' => $result
-				),
-				'Data has been retrieved.'
+			self::OK,
+			array(
+				'status' => 'success',
+				'data' => $result
+			),
+			'Data has been retrieved.'
 		);
 	}
 

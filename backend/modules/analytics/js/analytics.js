@@ -492,6 +492,8 @@ jsBackend.analytics.pageNotFoundStatistics =
 				extension: $filterExtension.val(),
 				browser: $filterBrowser.val(),
 				browserVersion: $filterBrowserVersion.val(),
+				startTimestamp: $('#startTimestamp').html(),
+				endTimestamp: $('#endTimestamp').html(),
 				date: date,
 				index: index
 			},

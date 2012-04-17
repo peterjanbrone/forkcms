@@ -200,6 +200,9 @@
         <translation language="de"><![CDATA[Anteil neuer Besucher]]></translation>
         <translation language="es"><![CDATA[porcertaje de nuevas visitas]]></translation>
       </item>
+      <item type="label" name="PageNotFoundStatistics">
+        <translation language="en"><![CDATA[page not found statistics]]></translation>
+      </item>
       <item type="label" name="PagesPerVisit">
         <translation language="nl"><![CDATA[pagina's per bezoek]]></translation>
         <translation language="en"><![CDATA[pages per visit]]></translation>

@@ -27,7 +27,7 @@ class AnalyticsInstaller extends ModuleInstaller
 		);
 
 		$visitors = array(
-			'column' => 'middle',
+			'column' => 'left',
 			'position' => 2,
 			'hidden' => false,
 			'present' => true
@@ -35,7 +35,7 @@ class AnalyticsInstaller extends ModuleInstaller
 
 		$pageNotFoundStats = array(
 			'column' => 'middle',
-			'position' => 3,
+			'position' => 2,
 			'hidden' => false,
 			'present' => true
 		);

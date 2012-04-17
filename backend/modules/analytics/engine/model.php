@@ -87,17 +87,20 @@ class BackendAnalyticsModel
 	 * Filters data so it's highchart-usable
 	 *
 	 * @param array data
+	 * @param int $startTimestamp The start timestamp of the data.
+	 * @param int $endTimestamp The end timestamp of the data.
 	 * @return array
 	 */
-	public static function convertForHighchart($data)
+	public static function convertForHighchart($data, $startTimestamp, $endTimestamp)
 	{
-		// build an empty container array with 9 days
+		// make a container with the appropriate amount of days
 		$highchartData = array();
-		$startTimestamp = strtotime('-1 week -1 days', mktime(13, 0, 0)); // add 13h so it matches google dates
-		for($i = 0; $i < 9; $i++)
+		$days = round(($endTimestamp - $startTimestamp) / (60 * 60 * 24));
+
+		for($i = 0; $i < $days; $i++)
 		{
 			$highchartData[$i] = array();
-			$highchartData[$i]['timestamp'] = (int) $startTimestamp + ($i * 86400);
+			$highchartData[$i]['timestamp'] = (int) $startTimestamp + ($i * 60 * 60 * 24);
 			$highchartData[$i]['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
 			$highchartData[$i]['pages_info'] = array();
 		}
@@ -115,7 +118,8 @@ class BackendAnalyticsModel
 
 			// collect all data for that day
 			$counter = 0;
-			while($data[$i]['timestamp'] === $currentDay)
+
+			while((int) $data[$i]['timestamp'] === (int) $currentDay)
 			{
 				$url = $data[$i]['pagePath'];
 
@@ -365,7 +369,6 @@ class BackendAnalyticsModel
 		{
 			self::$dashboardData = self::getCacheFile($startTimestamp, $endTimestamp);
 		}
-
 		return self::$dashboardData;
 	}
 
@@ -657,6 +660,17 @@ class BackendAnalyticsModel
 			 WHERE id = ?',
 			array((int) $pageId)
 		);
+	}
+
+	/**
+	 * Get page not found statistics
+	 *
+	 * @param int $startTimestamp The start timestamp for the cache file.
+	 * @param int $endTimestamp The end timestamp for the cache file.
+	 */
+	public static function getPageNotFoundStatistics($startTimestamp, $endTimestamp)
+	{
+		return self::getDataFromCacheByType('page_not_found_statistics', $startTimestamp, $endTimestamp);
 	}
 
 	/**

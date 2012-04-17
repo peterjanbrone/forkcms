@@ -50,34 +50,41 @@ class BackendAnalyticsWidgetVisitors extends BackendBaseWidget
 		$graphData = array();
 		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
 		$endTimestamp = mktime(0, 0, 0);
-		$metricsPerDay = BackendAnalyticsModel::getMetricsPerDay($metrics, $startTimestamp, $endTimestamp);
 
-		foreach($metrics as $i => $metric)
+		// get dashboard data
+		$dashboardData = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp, true);
+
+		// there are some metrics
+		if($dashboardData !== false && !empty($dashboardData))
 		{
-			// build graph data array
-			$graphData[$i] = array();
-			$graphData[$i]['title'] = $metric;
-			$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
-			$graphData[$i]['i'] = $i + 1;
-			$graphData[$i]['data'] = array();
-
-			foreach($metricsPerDay as $j => $data)
+			// loop metrics
+			foreach($metrics as $i => $metric)
 			{
-				// cast SimpleXMLElement to array
-				$data = (array) $data;
+				// build graph data array
+				$graphData[$i] = array();
+				$graphData[$i]['title'] = $metric;
+				$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
+				$graphData[$i]['i'] = $i + 1;
+				$graphData[$i]['data'] = array();
 
-				// build array
-				$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-				$graphData[$i]['data'][$j]['value'] = (string) $data[$metric];
+				// loop metrics per day
+				foreach($dashboardData as $j => $data)
+				{
+					// cast SimpleXMLElement to array
+					$data = (array) $data;
+
+					// build array
+					$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
+					$graphData[$i]['data'][$j]['value'] = (string) $data[$metric];
+				}
 			}
 		}
 
+		// get the maximum Y value
 		foreach($graphData as $metric)
 		{
-			// loop the data
 			foreach($metric['data'] as $data)
 			{
-				// get the maximum value
 				if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
 			}
 		}

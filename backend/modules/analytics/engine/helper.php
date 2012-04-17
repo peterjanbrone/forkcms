@@ -120,20 +120,17 @@ class BackendAnalyticsHelper
 	public static function getDashboardData($startTimestamp, $endTimestamp)
 	{
 		// get metrics
-		$metrics = array('uniquePageviews', 'pageviews', 'visitors');
+		$metrics = array('pageviews', 'visitors');
 		$gaMetrics = array();
 		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
 
 		// get dimensions
-		$dimensions = array('date', 'pagePath', 'browser', 'browserVersion', 'customVarValue1', 'customVarValue2', 'customVarValue3');
+		$dimensions = array('date');
 		$gaDimensions = array();
 		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
 
-		// set the sort parameter
-		$parameters = array('sort' => 'ga:date');
-
 		// get results
-		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $gaDimensions, $parameters);
+		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $gaDimensions);
 		$entries = array();
 
 		// loop results
@@ -151,13 +148,51 @@ class BackendAnalyticsHelper
 				$entry[$metric] = (int) $result[$metric];
 			}
 
-			// loop dimensions
+			$entries[] = $entry;
+		}
+
+		// get all page not found statistics
+		$metrics = array('uniquePageviews');
+		$gaMetrics = array();
+		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
+
+		// get dimensions
+		$dimensions = array('date', 'pagePath', 'browser', 'browserVersion', 'customVarValue1', 'customVarValue2', 'customVarValue3');
+		$gaDimensions = array();
+		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
+
+		// get page not found statistics
+		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $gaDimensions);
+
+		// set initial values
+		foreach($entries as &$entry)
+		{
+			$entry['uniquePageviews'] = 0;
 			foreach($dimensions as $dimension)
 			{
-				if($dimension !== 'date') $entry[$dimension] = (string) $result[$dimension];
+				if($dimension !== 'date') $entry[$dimension] = '';
 			}
+		}
 
-			$entries[] = $entry;
+		// loop statistics into the entries
+		foreach($results['entries'] as $result)
+		{
+			// loop all entries
+			foreach($entries as &$entry)
+			{
+				// convert date to timestamp
+				$timestamp = gmmktime(12, 0, 0, substr($result['date'], 4, 2), substr($result['date'], 6, 2), substr($result['date'], 0, 4));
+
+				// insert if dates match
+				if($timestamp === $entry['timestamp'])
+				{
+					$entry['uniquePageviews'] = $result['uniquePageviews'];
+					foreach($dimensions as $dimension)
+					{
+						if($dimension !== 'date') $entry[$dimension] = $result[$dimension];
+					}
+				}
+			}
 		}
 
 		return $entries;
@@ -445,6 +480,58 @@ class BackendAnalyticsHelper
 			foreach($metrics as $metric) $entry[$metric] = (int) $result[$metric];
 
 			// add to entries array
+			$entries[] = $entry;
+		}
+
+		return $entries;
+	}
+
+	/**
+	 * Get page not found statistics
+	 *
+	 * @param int $startTimestamp The start timestamp for the google call.
+	 * @param int $endTimestamp The end timestamp for the google call.
+	 */
+	public static function getPageNotFoundStatistics($startTimestamp, $endTimestamp)
+	{
+		// get metrics
+		$metrics = array('pageviews', 'uniquePageviews');
+		$gaMetrics = array();
+		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
+
+		// get dimensions
+		$dimensions = array('date', 'pagePath', 'browser', 'browserVersion', 'customVarValue1', 'customVarValue2', 'customVarValue3');
+		$gaDimensions = array();
+		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
+
+		// set the sort parameter
+		$parameters = array('sort' => 'ga:date');
+
+		// get results
+		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $gaDimensions, $parameters);
+		$entries = array();
+
+		// loop results
+		foreach($results['entries'] as $result)
+		{
+			$timestamp = gmmktime( -2, 0, 0, substr($result['date'], 4, 2), substr($result['date'], 6, 2), substr($result['date'], 0, 4));
+
+			// store metrics in correct format
+			$entry = array();
+			$entry['timestamp'] = $timestamp;
+
+			// loop metrics
+			foreach($metrics as $metric)
+			{
+				$entry[$metric] = (int) $result[$metric];
+			}
+
+			// loop dimensions
+			foreach($dimensions as $dimension)
+			{
+				if($dimension !== 'date') $entry[$dimension] = (string) $result[$dimension];
+			}
+
 			$entries[] = $entry;
 		}
 

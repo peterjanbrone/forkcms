@@ -11,6 +11,8 @@
 	<div class="options content">
 		{option:analyticsPageNotFoundStatisticsGraphData}
 			<div id="dataChartPageNotFoundStatistics" class="hidden">
+				<span id="startTimestamp">{$analyticsPageNotFoundStatisticsStartDate}</span>
+				<span id="endTimestamp">{$analyticsPageNotFoundStatisticsEndDate}</span>
 				<span id="maxYAxis">{$analyticsPageNotFoundStatisticsMaxYAxis}</span>
 				<span id="tickInterval">{$analyticsPageNotFoundStatisticsTickInterval}</span>
 				<span id="yAxisTitle">{$lblPageviews|ucfirst}</span>

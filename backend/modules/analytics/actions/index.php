@@ -224,16 +224,14 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 	{
 		$metrics = array('pageviews');
 		$graphData = array();
-		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
-		$endTimestamp = mktime(0, 0, 0);
 
 		// get the data
-		$statistics = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp, true);
+		$statistics = BackendAnalyticsModel::getPageNotFoundStatistics($this->startTimestamp, $this->endTimestamp);
 
 		if($statistics !== false)
 		{
 			// make the data highchart usable
-			$statistics = BackendAnalyticsModel::convertForHighchart($statistics);
+			$statistics = BackendAnalyticsModel::convertForHighchart($statistics, $this->startTimestamp, $this->endTimestamp);
 
 			// loop metrics
 			foreach($metrics as $i => $metric)
@@ -309,16 +307,19 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 					array_push($filterBrowserVersion, array('versionId' => $version));
 				}
 			}
+
+			$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
+			$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
+			$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
+			$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']) . ' missing pages:');
+			$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
+			$this->tpl->assign('filterBrowser', $filterBrowser);
+			$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
+			$this->tpl->assign('filterExtension', $extensions);
 		}
 
-		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
-		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
-		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
-		$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']) . ' missing pages:');
-		$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
-		$this->tpl->assign('filterBrowser', $filterBrowser);
-		$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
-		$this->tpl->assign('filterExtension', $extensions);
+		$this->tpl->assign('chartPageNotFoundStatisticsStartDate', $this->startTimestamp);
+		$this->tpl->assign('chartPageNotFoundStatisticsEndDate', $this->endTimestamp);
 	}
 
 	/**
