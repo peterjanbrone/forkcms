@@ -482,7 +482,6 @@ jsBackend.analytics.pageNotFoundStatistics =
 		}
 
 		// check if we even need to refresh
-		console.log($('#pageNotFoundStatisticsDate').text());
 		if($('#pageNotFoundStatisticsDate').text() === date || (date === null || date === '')) return;
 
 		// collapse the datagrid

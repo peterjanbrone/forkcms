@@ -49,6 +49,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$maxYAxis = 2;
 		$metrics = array('pageviews');
 		$graphData = array();
+		$dashboardData = array();
 
 		// search for the analytics cache file
 		$timestamps = array(0,0);

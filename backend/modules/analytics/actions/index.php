@@ -228,96 +228,95 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		// get the data
 		$statistics = BackendAnalyticsModel::getPageNotFoundStatistics($this->startTimestamp, $this->endTimestamp);
 
-		if($statistics !== false)
+		// no-data fix, this way we'll have an empty graphdata array instead of no graphdata at all
+		if($statistics === false || empty($statistics)) $statistics = array(array('timestamp' => 0));
+
+		// make the data highchart usable
+		$statistics = BackendAnalyticsModel::convertForHighchart($statistics, $this->startTimestamp, $this->endTimestamp);
+
+		// loop metrics
+		foreach($metrics as $i => $metric)
 		{
-			// make the data highchart usable
-			$statistics = BackendAnalyticsModel::convertForHighchart($statistics, $this->startTimestamp, $this->endTimestamp);
+			// build graph data array
+			$graphData[$i] = array();
+			$graphData[$i]['title'] = $metric;
+			$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
+			$graphData[$i]['i'] = $i + 1;
+			$graphData[$i]['data'] = array();
 
-			// loop metrics
-			foreach($metrics as $i => $metric)
+			// loop metrics per day
+			foreach($statistics as $j => $data)
 			{
-				// build graph data array
-				$graphData[$i] = array();
-				$graphData[$i]['title'] = $metric;
-				$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
-				$graphData[$i]['i'] = $i + 1;
-				$graphData[$i]['data'] = array();
+				// cast SimpleXMLElement to array
+				$data = (array) $data;
 
-				// loop metrics per day
-				foreach($statistics as $j => $data)
-				{
-					// cast SimpleXMLElement to array
-					$data = (array) $data;
+				// build array
+				$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
+				$graphData[$i]['data'][$j]['value'] = (string) count($data[$metric]);
 
-					// build array
-					$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-					$graphData[$i]['data'][$j]['value'] = (string) count($data[$metric]);
-
-					// perform an extra check to determine if we counted the 'none...' row
-					if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
-				}
+				// perform an extra check to determine if we counted the 'none...' row
+				if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
 			}
-
-			// get the maximum value
-			$maxYAxis = 2;
-			foreach($graphData as $metric)
-			{
-				foreach($metric['data'] as $data)
-				{
-					if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
-				}
-			}
-
-			// collect all browsers, versions and extensions
-			$browsers = array();
-			$extensions = array(array('name' => '-'));
-			foreach($statistics as $stat)
-			{
-				foreach($stat['pages_info'] as $page)
-				{
-					// get all browsers
-					if(!in_array($page['browser'], $browsers))
-					{
-						$browsers[$page['browser']] = array('name' => $page['browser'], 'versions' => array());
-					}
-
-					// get all versions of each browser
-					if(!in_array($page['browser_version'], $browsers[$page['browser']]['versions']))
-					{
-						array_push($browsers[$page['browser']]['versions'], $page['browser_version']);
-					}
-
-					// get all extensions
-					if(!in_array($page['extension'], $extensions))
-					{
-						$extensions[$page['extension']] = array('name' => $page['extension']);
-					}
-				}
-			}
-
-			// construct 2 arrays suited for iteration
-			$filterBrowser = array(array('name' => '-'));
-			$filterBrowserVersion = array(array('versionId' => '-'));
-			foreach($browsers as $browser)
-			{
-				array_push($filterBrowser, array('name' => $browser['name']));
-
-				foreach($browser['versions'] as $version)
-				{
-					array_push($filterBrowserVersion, array('versionId' => $version));
-				}
-			}
-
-			$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
-			$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
-			$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
-			$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']));
-			$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
-			$this->tpl->assign('filterBrowser', $filterBrowser);
-			$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
-			$this->tpl->assign('filterExtension', $extensions);
 		}
 
+		// get the maximum value
+		$maxYAxis = 2;
+		foreach($graphData as $metric)
+		{
+			foreach($metric['data'] as $data)
+			{
+				if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
+			}
+		}
+
+		// collect all browsers, versions and extensions
+		$browsers = array();
+		$extensions = array(array('name' => '-'));
+		foreach($statistics as $stat)
+		{
+			foreach($stat['pages_info'] as $page)
+			{
+				// get all browsers
+				if(!in_array($page['browser'], $browsers))
+				{
+					$browsers[$page['browser']] = array('name' => $page['browser'], 'versions' => array());
+				}
+
+				// get all versions of each browser
+				if(!in_array($page['browser_version'], $browsers[$page['browser']]['versions']))
+				{
+					array_push($browsers[$page['browser']]['versions'], $page['browser_version']);
+				}
+
+				// get all extensions
+				if(!in_array($page['extension'], $extensions))
+				{
+					$extensions[$page['extension']] = array('name' => $page['extension']);
+				}
+			}
+		}
+
+		// construct 2 arrays suited for iteration
+		$filterBrowser = array(array('name' => '-'));
+		$filterBrowserVersion = array(array('versionId' => '-'));
+		foreach($browsers as $browser)
+		{
+			array_push($filterBrowser, array('name' => $browser['name']));
+
+			foreach($browser['versions'] as $version)
+			{
+				array_push($filterBrowserVersion, array('versionId' => $version));
+			}
+		}
+
+		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
+		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
+		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
+		$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']));
+		$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
+		$this->tpl->assign('filterBrowser', $filterBrowser);
+		$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
+		$this->tpl->assign('filterExtension', $extensions);
 		$this->tpl->assign('chartPageNotFoundStatisticsStartDate', $this->startTimestamp);
 		$this->tpl->assign('chartPageNotFoundStatisticsEndDate', $this->endTimestamp);
 	}
