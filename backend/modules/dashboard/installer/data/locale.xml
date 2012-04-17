@@ -13,6 +13,9 @@
         <translation language="fr"><![CDATA[toutes les statistiques]]></translation>
         <translation language="es"><![CDATA[todas las estadisticas]]></translation>
       </item>
+      <item type="label" name="PageNotFoundStatistics">
+        <translation language="en"><![CDATA[page not found statistics]]></translation>
+      </item>
       <item type="label" name="TopKeywords">
         <translation language="nl"><![CDATA[top zoekwoorden]]></translation>
         <translation language="en"><![CDATA[top keywords]]></translation>
