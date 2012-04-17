@@ -311,7 +311,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 			$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
 			$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
 			$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
-			$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']) . ' missing pages:');
+			$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']));
 			$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
 			$this->tpl->assign('filterBrowser', $filterBrowser);
 			$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);

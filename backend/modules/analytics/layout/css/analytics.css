@@ -144,6 +144,9 @@
 	padding-top: 24px;
 }
 
+#dataGridPageNotFoundStatistics td{
+	padding-left: 12px;
+}
 #pageNotFoundStatisticsFilter {
 	position: absolute;
 	top: 18px;

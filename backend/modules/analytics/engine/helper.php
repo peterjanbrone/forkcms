@@ -151,50 +151,6 @@ class BackendAnalyticsHelper
 			$entries[] = $entry;
 		}
 
-		// get all page not found statistics
-		$metrics = array('uniquePageviews');
-		$gaMetrics = array();
-		foreach($metrics as $metric) $gaMetrics[] = 'ga:' . $metric;
-
-		// get dimensions
-		$dimensions = array('date', 'pagePath', 'browser', 'browserVersion', 'customVarValue1', 'customVarValue2', 'customVarValue3');
-		$gaDimensions = array();
-		foreach($dimensions as $dimension) $gaDimensions[] = 'ga:' . $dimension;
-
-		// get page not found statistics
-		$results = self::getGoogleAnalyticsInstance()->getAnalyticsResults($gaMetrics, $startTimestamp, $endTimestamp, $gaDimensions);
-
-		// set initial values
-		foreach($entries as &$entry)
-		{
-			$entry['uniquePageviews'] = 0;
-			foreach($dimensions as $dimension)
-			{
-				if($dimension !== 'date') $entry[$dimension] = '';
-			}
-		}
-
-		// loop statistics into the entries
-		foreach($results['entries'] as $result)
-		{
-			// loop all entries
-			foreach($entries as &$entry)
-			{
-				// convert date to timestamp
-				$timestamp = gmmktime(12, 0, 0, substr($result['date'], 4, 2), substr($result['date'], 6, 2), substr($result['date'], 0, 4));
-
-				// insert if dates match
-				if($timestamp === $entry['timestamp'])
-				{
-					$entry['uniquePageviews'] = $result['uniquePageviews'];
-					foreach($dimensions as $dimension)
-					{
-						if($dimension !== 'date') $entry[$dimension] = $result[$dimension];
-					}
-				}
-			}
-		}
-
 		return $entries;
 	}
 

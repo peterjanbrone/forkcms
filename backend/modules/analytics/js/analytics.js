@@ -15,7 +15,6 @@ jsBackend.analytics =
 		$chartDoubleMetricPerDay = $('#chartDoubleMetricPerDay');
 		$chartSingleMetricPerDay = $('#chartSingleMetricPerDay');
 		$chartPageNotFoundStatistics = $('#chartPageNotFoundStatistics');
-		$chartWidgetPageNotFoundStatistics = $('#chartWidgetPageNotFoundStatistics');
 
 		// filter variables
 		$filterExtension = $('#extension');
@@ -30,7 +29,6 @@ jsBackend.analytics =
 		jsBackend.analytics.chartSingleMetricPerDay.init();
 		jsBackend.analytics.chartWidget.init();
 		jsBackend.analytics.chartPageNotFoundStatistics.init();
-		jsBackend.analytics.chartWidgetPageNotFoundStatistics.init();
 		jsBackend.analytics.pageNotFoundStatistics.init();
 		jsBackend.analytics.loading.init();
 		jsBackend.analytics.resize.init();
@@ -394,78 +392,6 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 	}
 }
 
-jsBackend.analytics.chartWidgetPageNotFoundStatistics =
-{
-	chart: '',
-
-	init: function()
-	{
-		if($chartWidgetPageNotFoundStatistics.length > 0)
-		{
-			jsBackend.analytics.chartWidgetPageNotFoundStatistics.create();
-			jsBackend.analytics.chartWidgetPageNotFoundStatistics.bind();
-		}
-	},
-
-	bind: function()
-	{
-		// show day details when clicking on a chart node
-		$('#chartPageNotFoundStatistics .highcharts-tracker').on('click', function(){jsBackend.analytics.pageNotFoundStatistics.toggleDays();});
-
-		// show details, except when the row text is 'none...'
-		$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
-	},
-
-	// add new chart
-	create: function()
-	{
-		var xAxisItems = $('#datachartWidgetPageNotFoundStatistics ul.series li.serie:first-child ul.data li');
-		var xAxisValues = [];
-		var xAxisCategories = [];
-		var counter = 0;
-		var interval = Math.ceil(xAxisItems.length / 10);
-
-		xAxisItems.each(function()
-		{
-			xAxisValues.push($(this).children('span.fulldate').html());
-			var text = $(this).children('span.date').html();
-			if(xAxisItems.length > 10 && counter%interval > 0) text = ' ';
-			xAxisCategories.push(text);
-			counter++;
-		});
-
-		var metric1Name = $('#datachartWidgetPageNotFoundStatistics ul.series li#metric1serie span.name').html();
-		var metric1Values = $('#datachartWidgetPageNotFoundStatistics ul.series li#metric1serie span.value');
-		var metric1Data = [];
-
-		metric1Values.each(function() { metric1Data.push(parseInt($(this).html())); });
-
-		jsBackend.analytics.chartWidgetPageNotFoundStatistics.chart = new Highcharts.Chart(
-		{
-			chart: { renderTo: 'chartWidgetPageNotFoundStatistics', defaultSeriesType: 'line', margin: [30, 0, 30, 0], height: 200, width: 270, defaultSeriesType: 'line' },
-			xAxis: { categories: xAxisCategories },
-			yAxis: { min: 0, max: $('#datachartWidgetPageNotFoundStatistics #maxYAxis').html(), tickInterval: ($('#datachartWidgetPageNotFoundStatistics #tickInterval').html() == '' ? null : $('#datachartWidgetPageNotFoundStatistics #tickInterval').html()), title: { enabled : false } },
-			credits: { enabled: false },
-			legend: { layout: 'horizontal', backgroundColor: 'transparent' },
-			tooltip: { formatter: function() { return '<b>'+ this.series.name +'</b><br/>'+ xAxisValues[this.point.x	] +': '+ this.y; } },
-			plotOptions:
-			{
-				line: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 6, lineWidth: 1 } } } },
-				area: { marker: { enabled: false, states: { hover: { enabled: true, symbol: 'circle', radius: 6, lineWidth: 1 } } } },
-				column: { pointPadding: 0.2, borderWidth: 0 },
-				series: { fillOpacity: 0.2 }
-			},
-			series: [ { name: metric1Name, data: metric1Data, type: 'area' }]
-		});
-	},
-
-	// destroy chart
-	destroy: function()
-	{
-		jsBackend.analytics.chartWidgetPageNotFoundStatistics.chart.destroy();
-	}
-}
-
 jsBackend.analytics.pageNotFoundStatistics =
 {
 	init: function()
@@ -542,7 +468,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 			jsBackend.analytics.chartPageNotFoundStatistics.init();
 
 			// make sure the datagrid refreshes
-			var date = $('#pageNotFoundStatisticsDate').text().replace('missing pages:', '');
+			var date = $('#pageNotFoundStatisticsDate').text();
 			jsBackend.analytics.pageNotFoundStatistics.toggleDays(date);
 		});
 	},
@@ -556,13 +482,14 @@ jsBackend.analytics.pageNotFoundStatistics =
 		}
 
 		// check if we even need to refresh
-		if($('#pageNotFoundStatisticsDate').text() === date + ' missing pages:') return;
+		console.log($('#pageNotFoundStatisticsDate').text());
+		if($('#pageNotFoundStatisticsDate').text() === date || (date === null || date === '')) return;
 
 		// collapse the datagrid
 		$('#pageNotFoundIndex').slideUp('medium', function() {});
 
 		// reset the date
-		$('#pageNotFoundStatisticsDate').text(date + ' missing pages:');
+		$('#pageNotFoundStatisticsDate').text(date);
 
 		// move the spinner !
 		var ajaxSpinner = $('#ajaxSpinner');
@@ -630,7 +557,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 		ajaxSpinner.insertAfter('#pageNotFoundStatisticsDate');
 		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
 
-		var date = $('#pageNotFoundStatisticsDate').text().replace('missing pages:', '');
+		var date = $('#pageNotFoundStatisticsDate').text();
 
 		// fetch the data
 		jsBackend.analytics.pageNotFoundStatistics.call(date, rowIndex, function(json){

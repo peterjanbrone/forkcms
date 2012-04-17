@@ -49,17 +49,51 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 		$maxYAxis = 2;
 		$metrics = array('pageviews');
 		$graphData = array();
-		$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
-		$endTimestamp = mktime(0, 0, 0);
 
-		// get dashboard data
-		$dashboardData = BackendAnalyticsModel::getDashboardData($metrics, $startTimestamp, $endTimestamp);
+		// search for the analytics cache file
+		$timestamps = array(0,0);
+		foreach (glob(BACKEND_CACHE_PATH . '/analytics/*.xml') as $filename)
+		{
+			// get timestamps
+			$path_parts = pathinfo($filename);
+			$result = $path_parts['filename'];
+			$fileTimestamps = explode('_', $result);
+
+			// make sure the cache file holds at least 1 week of data
+			if(((int) $fileTimestamps[1] - (int) $fileTimestamps[0]) > 6 * 24 * 60 * 60)
+			{
+				// make sure to take the most recent file
+				if((int) $fileTimestamps[1] > (int) $timestamps[1])
+				{
+					$timestamps = $fileTimestamps;
+				}
+			}
+		}
+
+		// store timestamps
+		$startTimestamp = $timestamps[0];
+		$endTimestamp = $timestamps[1];
+
+		// get the data from cache
+		if($startTimestamp !== 0)
+		{
+			$dashboardData = BackendAnalyticsModel::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
+		}
+
+		// no appropriate cache file? -> make it ourselves
+		else
+		{
+			$startTimestamp = strtotime('-1 week -1 days', mktime(0, 0, 0));
+			$endTimestamp = mktime(0, 0, 0);
+			$dashboardData = BackendAnalyticsHelper::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
+			BackendAnalyticsModel::writeCacheFile($dashboardData, $startTimestamp, $endTimestamp);
+		}
 
 		// there are some metrics
 		if($dashboardData !== false && !empty($dashboardData))
 		{
 			// make the data highchart usable
-			$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData, $startTimestamp, $endTimestamp);
+			$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData, strtotime('-1 week -1 days', mktime(0, 0, 0)), mktime(0, 0, 0));
 
 			// loop metrics
 			foreach($metrics as $i => $metric)
@@ -82,7 +116,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 					$graphData[$i]['data'][$j]['value'] = (int) count($data[$metric]);
 
 					// perform an extra check to determine if we counted the 'none...' row
-					// if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
+					if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
 				}
 			}
 
@@ -98,7 +132,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 			$this->tpl->assign('analyticsPageNotFoundStatisticsMaxYAxis', $maxYAxis);
 			$this->tpl->assign('analyticsPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
 			$this->tpl->assign('analyticsPageNotFoundStatisticsGraphData', $graphData);
-			$this->tpl->assign('analyticsPageNotFoundStatisticsDate', date("D j M", (int) $dashboardData[0]['timestamp']) . ' missing pages:');
+			$this->tpl->assign('analyticsPageNotFoundStatisticsDate', date("D j M", (int) $dashboardData[0]['timestamp']));
 			$this->tpl->assign('pageNotFoundStatisticsDataGrid', $dashboardData[0]);
 		}
 
