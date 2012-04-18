@@ -903,14 +903,23 @@ class BackendLocaleModel
 
 		// build the query
 		$query =
-			'SELECT l.id, l.module, l.type, l.name, l.value, l.language
-			 FROM locale AS l
+			'SELECT
+				l1.id,
+				l1.module,
+				l1.type,
+				l1.name,
+				l1.value,
+				l1.language
+			 FROM
+			    locale AS l1
+			 LEFT JOIN locale AS l2
+			    ON l1.name = l2.name
 			 WHERE
-			 	l.language IN (' . implode(',', $aLanguages) . ') AND
-			 	l.application = ? AND
-			 	l.name LIKE ? AND
-			 	l.value LIKE ? AND
-			 	l.type IN (' . implode(',', $types) . ')';
+			    l2.language IN (' . implode(',', $aLanguages) . ') AND
+			    l2.application = ? AND
+			    l2.name LIKE ? AND
+			    l2.value LIKE ? AND
+				l2.type IN (' . implode(',', $types) . ')';
 
 		// add the paremeters
 		$parameters = array($application, '%' . $name . '%', '%' . $value . '%');
@@ -918,7 +927,7 @@ class BackendLocaleModel
 		// add module to the query if needed
 		if($module)
 		{
-			$query .= ' AND l.module = ?';
+			$query .= ' AND l2.module = ?';
 			$parameters[] = $module;
 		}
 
