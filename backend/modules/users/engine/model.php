@@ -21,6 +21,29 @@ class BackendUsersModel
 		 WHERE i.deleted = ?';
 
 	/**
+	 * Function which indicates if this profile can add or edit groups
+	 */
+	public static function canEditGroups($id)
+	{
+		$groupIds = BackendModel::getDB(true)->getColumn('
+			SELECT group_id FROM users_groups WHERE user_id = ?
+		', array($id));
+
+		$query = '
+			SELECT
+				COUNT(id)
+			FROM
+				groups_rights_actions
+			WHERE
+				module = "groups" AND
+				action ="edit" AND
+				level = 7 AND
+				group_id IN ("' . implode('","', $groupIds) . '")';
+
+		return (bool) BackendModel::getDB(true)->getVar($query);
+	}
+
+	/**
 	 * Mark the user as deleted and deactivate his account.
 	 *
 	 * @param int $id The userId to delete.

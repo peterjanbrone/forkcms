@@ -31,6 +31,13 @@ class BackendUsersEdit extends BackendBaseActionEdit
 	private $user;
 
 	/**
+	 * Does the user has the rights to edit groups?
+	 *
+	 * @var bool
+	 */
+	private $canEditGroups;
+
+	/**
 	 * Execute the action
 	 */
 	public function execute()
@@ -107,7 +114,25 @@ class BackendUsersEdit extends BackendBaseActionEdit
 		// disable active field for current users
 		if($this->authenticatedUser->getUserId() == $this->record['id']) $this->frm->getField('active')->setAttribute('disabled', 'disabled');
 		$this->frm->addCheckbox('api_access', (isset($this->record['settings']['api_access']) && $this->record['settings']['api_access'] == 'Y'));
-		$this->frm->addMultiCheckbox('groups', BackendGroupsModel::getAll(), $checkedGroups);
+
+		// add checkboxes
+		$checkBoxes = BackendGroupsModel::getAll();
+		$this->frm->addMultiCheckbox('groups', $checkBoxes, $checkedGroups);
+
+		// disable group checkboxes if the user has no rights
+		if(!$this->canEditGroups = BackendUsersModel::canEditGroups(BackendAuthentication::getUser()->getUserId()))
+		{
+			$values = array();
+			foreach($checkBoxes as $i => $checkBox)
+			{
+				array_push($values, array(
+					'label' => 'checkbox',
+					'value' => $i + 1,
+					'attributes' => array('disabled' => 'disabled')
+				));
+			}
+			$this->frm->getField('groups')->setValues($values);
+		}
 	}
 
 	/**
@@ -180,7 +205,8 @@ class BackendUsersEdit extends BackendBaseActionEdit
 			$fields['date_format']->isFilled(BL::err('FieldIsRequired'));
 			$fields['time_format']->isFilled(BL::err('FieldIsRequired'));
 			$fields['number_format']->isFilled(BL::err('FieldIsRequired'));
-			$fields['groups']->isFilled(BL::err('FieldIsRequired'));
+			if($this->canEditGroups) $fields['groups']->isFilled(BL::err('FieldIsRequired'));
+
 			if(isset($fields['new_password']) && $fields['new_password']->isFilled())
 			{
 				if($fields['new_password']->getValue() !== $fields['confirm_password']->getValue()) $fields['confirm_password']->addError(BL::err('ValuesDontMatch'));
@@ -238,32 +264,35 @@ class BackendUsersEdit extends BackendBaseActionEdit
 					}
 				}
 
-				// get selected groups
-				$groups = $fields['groups']->getChecked();
-
-				// init var
-				$newSequence = BackendGroupsModel::getSetting($groups[0], 'dashboard_sequence');
-
-				// loop through groups and collect all dashboard widget sequences
-				foreach($groups as $group) $sequences[] = BackendGroupsModel::getSetting($group, 'dashboard_sequence');
-
-				// loop through sequences
-				foreach($sequences as $sequence)
+				if(($this->canEditGroups))
 				{
-					// loop through modules inside a sequence
-					foreach($sequence as $moduleKey => $module)
+					// get selected groups
+					$groups = $fields['groups']->getChecked();
+
+					// init var
+					$newSequence = BackendGroupsModel::getSetting($groups[0], 'dashboard_sequence');
+
+					// loop through groups and collect all dashboard widget sequences
+					foreach($groups as $group) $sequences[] = BackendGroupsModel::getSetting($group, 'dashboard_sequence');
+
+					// loop through sequences
+					foreach($sequences as $sequence)
 					{
-						// loop through widgets inside a module
-						foreach($module as $widgetKey => $widget)
+						// loop through modules inside a sequence
+						foreach($sequence as $moduleKey => $module)
 						{
-							// if widget present set true
-							if($widget['present']) $newSequence[$moduleKey][$widgetKey]['present'] = true;
+							// loop through widgets inside a module
+							foreach($module as $widgetKey => $widget)
+							{
+								// if widget present set true
+								if($widget['present']) $newSequence[$moduleKey][$widgetKey]['present'] = true;
+							}
 						}
 					}
-				}
 
-				// add new sequence to settings
-				$settings['dashboard_sequence'] = $newSequence;
+					// add new sequence to settings
+					$settings['dashboard_sequence'] = $newSequence;
+				}
 
 				// has the user submitted an avatar?
 				if($fields['avatar']->isFilled())
@@ -300,7 +329,7 @@ class BackendUsersEdit extends BackendBaseActionEdit
 				BackendUsersModel::update($user, $settings);
 
 				// save groups
-				BackendGroupsModel::insertMultipleGroups($this->id, $groups);
+				if(($this->canEditGroups)) BackendGroupsModel::insertMultipleGroups($this->id, $groups);
 
 				// trigger event
 				BackendModel::triggerEvent($this->getModule(), 'after_edit', array('item' => $user));
