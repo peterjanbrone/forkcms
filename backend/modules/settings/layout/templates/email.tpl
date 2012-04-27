@@ -27,8 +27,19 @@
 		</div>
 	{/option:isGod}
 		<div class="options">
+			<h4>{$lblLanguageDependency|ucfirst}</h4>
+			<p>{$msgHelpLanguageDependency}</p>
+			<p>
+				{$ddmLanguageDependency} {$ddmLanguageDependencyError}
+			</p>
+		</div>
+		<div class="options">
 			<h4>{$lblFrom|ucfirst}</h4>
 			<p>{$msgHelpEmailFrom}</p>
+
+			<div class="dataGridHolder">
+				{$dgEmailFrom}
+			</div>
 			<p>
 				<label for="mailerFromName">{$lblName|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
 				{$txtMailerFromName} {$txtMailerFromNameError}
@@ -41,6 +52,10 @@
 		<div class="options">
 			<h4>{$lblTo|ucfirst}</h4>
 			<p>{$msgHelpEmailTo}</p>
+
+			<div class="dataGridHolder">
+				{$dgEmailTo}
+			</div>
 			<p>
 				<label for="mailerToName">{$lblName|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
 				{$txtMailerToName} {$txtMailerToNameError}
@@ -52,6 +67,10 @@
 		</div>
 		<div class="options">
 			<h4>{$lblReplyTo|ucfirst}</h4>
+
+			<div class="dataGridHolder">
+				{$dgReplyTo}
+			</div>
 			<p>
 				<label for="mailerReplyToName">{$lblName|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
 				{$txtMailerReplyToName} {$txtMailerReplyToNameError}
