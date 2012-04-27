@@ -18,6 +18,10 @@ jsBackend.settings =
 		$('#testEmailConnection').on('click', jsBackend.settings.testEmailConnection);
 
 		$('#activeLanguages input:checkbox').on('change', jsBackend.settings.changeActiveLanguage).change();
+
+		$('#languageDependency').on('change', jsBackend.settings.changeLanguageDependency).change();
+
+		jsBackend.settings.initControls();
 	},
 
 	changeActiveLanguage: function(e)
@@ -32,6 +36,49 @@ jsBackend.settings =
 
 			if($this.is(':checked')) $other.attr('disabled', false);
 			else $other.attr('checked', false).attr('disabled', true);
+		}
+	},
+
+	changeLanguageDependency: function(dependency)
+	{
+		if($('#languageDependency').val() == 1)
+		{
+			// prevent form from submitting (ajax)
+			$('form').submit(function(e){e.preventDefault();});
+
+			$('.dataGridHolder').show();
+			$('.options').has('.dataGridHolder').find('p').has('label').hide();
+		}
+		else
+		{
+			// undo e.preventDefault
+			$('form').submit(function(e){$(this).unbind('submit').submit()});
+
+			$('.dataGridHolder').hide();
+			$('.options').has('.dataGridHolder').find('p').has('label').show();
+		}
+	},
+
+	initControls: function()
+	{
+		if($('.dataGrid td.translationValue').length > 0)
+		{
+			// bind
+			$.each($('.dataGrid td.translationValue'), function(key, value) {
+				$(this).inlineTextEdit(
+				{
+					params: { fork: { action: 'save_settings' }, language: $(this).prevAll("td.language:first").html()},
+					tooltip: '{$msgClickToEdit}',
+					afterSave: function(item)
+					{
+						if(item.find('span:empty').length == 1) item.addClass('highlighted');
+						else item.removeClass('highlighted');
+					},
+				});
+			});
+
+			// highlight all empty items
+			$('.dataGrid td.translationValue span:empty').parents('td.translationValue').addClass('highlighted');
 		}
 	},
 
