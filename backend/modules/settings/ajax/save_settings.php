@@ -10,8 +10,7 @@
 /**
  * This action will update a translation using AJAX
  *
- * @author Lowie Benoot <lowie.benoot@netlash.com>
- * @author Matthias Mullie <matthias@mullie.eu>
+ * @author Peter-Jan Brone <peterjan.brone@wijs.be>
  */
 class BackendSettingsAjaxSaveSettings extends BackendBaseAJAXAction
 {
@@ -33,19 +32,11 @@ class BackendSettingsAjaxSaveSettings extends BackendBaseAJAXAction
 
 		if(!isset($error))
 		{
-			// get current settings
+			// update settings
 			$settings = BackendModel::getModuleSetting('core', $setting);
-
-			// insert where languages match
-			foreach($settings as &$item)
-			{
-				if($item['language'] === $language){$item[$column] = $value;}
-			}
-
-			// save settings
+			$settings[$language][$column] = $value;
 		 	BackendModel::setModuleSetting('core', $setting, $settings);
 
-			// output OK
 			$this->output(self::OK);
 		}
 
