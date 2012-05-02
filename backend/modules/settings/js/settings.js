@@ -19,9 +19,7 @@ jsBackend.settings =
 
 		$('#activeLanguages input:checkbox').on('change', jsBackend.settings.changeActiveLanguage).change();
 
-		$('#languageDependency').on('change', jsBackend.settings.changeLanguageDependency).change();
-
-		jsBackend.settings.initControls();
+		jsBackend.settings.transformToTextBoxes();
 	},
 
 	changeActiveLanguage: function(e)
@@ -36,50 +34,6 @@ jsBackend.settings =
 
 			if($this.is(':checked')) $other.attr('disabled', false);
 			else $other.attr('checked', false).attr('disabled', true);
-		}
-	},
-
-	changeLanguageDependency: function(dependency)
-	{
-		if($('#languageDependency').val() == 1)
-		{
-			// prevent form from submitting (ajax)
-			$('form').unbind('submit');
-			$('form').submit(function(e){e.preventDefault();});
-
-			$('.dataGridHolder').show();
-			$('.options').has('.dataGridHolder').find('p').has('label').hide();
-		}
-		else
-		{
-			// undo e.preventDefault
-			$('form').submit(function(e){$(this).unbind('submit').submit();});
-
-			$('.dataGridHolder').hide();
-			$('.options').has('.dataGridHolder').find('p').has('label').show();
-		}
-	},
-
-	initControls: function()
-	{
-		if($('.dataGrid td.translationValue').length > 0)
-		{
-			// bind
-			$.each($('.dataGrid td.translationValue'), function(key, value) {
-				$(this).inlineTextEdit(
-				{
-					params: { fork: { action: 'save_settings' }, language: $(this).prevAll("td.language:first").html()},
-					tooltip: '{$msgClickToEdit}',
-					afterSave: function(item)
-					{
-						if(item.find('span:empty').length == 1) item.addClass('highlighted');
-						else item.removeClass('highlighted');
-					},
-				});
-			});
-
-			// highlight all empty items
-			$('.dataGrid td.translationValue span:empty').parents('td.translationValue').addClass('highlighted');
 		}
 	},
 
@@ -126,6 +80,31 @@ jsBackend.settings =
 				$error.show();
 			}
 		});
+	},
+
+	transformToTextBoxes: function()
+	{
+		if($('.dataGrid td.transform').length > 0)
+		{
+			$.each($('.dataGrid td.transform'), function()
+			{
+				// get necessary data
+				var $elem = $(this);
+				var col = $elem.attr('data-column');
+				var lang = $elem.parent().attr('data-language').toLowerCase();
+				var parts = $elem.html().split("||");
+
+				// construct html
+				var name =
+					'<label for="name">Name:</label>' +
+					'<input name="' + lang + '-' + col + '-name" type="text" class="inputText" value="' + parts[0] + '" />';
+				var email =
+					'<label for="email">E-mail:</label>' +
+					'<input name="' + lang + '-' + col + '-email" type="text" class="inputText" value="' + parts[1] + '" />';
+
+				$elem.html(name + email);
+			});
+		}
 	}
 }
 

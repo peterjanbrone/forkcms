@@ -46,71 +46,49 @@ class BackendSettingsEmail extends BackendBaseActionIndex
 	private function loadForm()
 	{
 		$this->isGod = BackendAuthentication::getUser()->isGod();
-		$this->wLang = BL::getWorkingLanguage();
+		$this->emailSettings = BackendModel::getModuleSetting('core', 'mailer_settings');
 
-		// email settings
-		$this->langDependency = BackendModel::getModuleSetting('core', 'language_dependency');
-		$this->mailerFrom = BackendModel::getModuleSetting('core', 'mailer_from');
-		$this->mailerTo = BackendModel::getModuleSetting('core', 'mailer_to');
-		$this->mailerReplyTo = BackendModel::getModuleSetting('core', 'mailer_reply_to');
-
-		// make sure to insert recently 'installed' languages
-		$languages = array_keys($this->mailerFrom);
-		foreach(array_diff(BL::getActiveLanguages(), $languages) as $language)
+		// check for recently added languages
+		$this->languages = array_keys($this->emailSettings);
+		foreach(array_diff(BL::getActiveLanguages(), $this->languages) as $language)
 		{
-			// copy values from working language
-			$default = array($language => array(
-				'name' => $this->mailerFrom[$this->wLang]['name'],
-				'email' => $this->mailerFrom[$this->wLang]['email']
+			// ignore default
+			if($language === 'default') continue;
+
+			// copy default values into the new language array
+			$this->emailSettings[$language] = $this->emailSettings['default'];
+
+			BackendModel::setModuleSetting('core', 'mailer_settings', $this->emailSettings);
+		}
+
+
+		// create our grid array
+		$source = array();
+		foreach($this->emailSettings as $key => $langSetting)
+		{
+			// make language pretty
+			$language = ($key === 'default')
+				? ucfirst($key)
+				: ucfirst(SpoonLocale::getLanguage($key));
+
+			array_push($source, array(
+				'language' => $language,
+				'to' => implode('||', $langSetting['to']),
+				'from' => implode('||', $langSetting['from']),
+				'reply' => implode('||', $langSetting['reply'])
 			));
-
-			// insert default values for the new language
-			array_push($this->mailerFrom, $default);
-			array_push($this->mailerTo, $default);
-			array_push($this->mailerReplyTo, $default);
-
-			// save in module settings
-			BackendModel::setModuleSetting('core', 'mailer_from', $this->mailerFrom);
-			BackendModel::setModuleSetting('core', 'mailer_to', $this->mailerTo);
-			BackendModel::setModuleSetting('core', 'mailer_reply_to', $this->mailerReplyTo);
 		}
 
-		// init datagrid array, 'setting_name' => ['setting_data', 'setting_datagrid']
-		$this->grids = array(
-			'mailer_from' => array($this->mailerFrom, $this->dgEmailFrom = null),
-			'mailer_to' => array($this->mailerTo, $this->dgEmailTo = null),
-			'mailer_reply_to' => array($this->mailerReplyTo, $this->dgReplyTo = null),
-		);
-
-		// loop each grid and insert a language value
-		foreach($this->grids as $i => &$grid)
-		{
-			foreach($grid[0] as $key => &$value) $value = array('language' => $key) + $value;
-			$grid[1] = new BackendDataGridArray($grid[0]);
-		}
-
-		// set datagrid attributes
-		foreach($this->grids as $setting => &$grid)
-		{
-			foreach(array('name', 'email') as $column)
-			{
-				$grid[1]->setColumnAttributes($column, array('data-id' => '{value: \'[value]\', column: \'' . $column . '\', setting: \'' . $setting . '\'}'));
-				$grid[1]->setColumnAttributes($column, array('class' => 'translationValue'));
-				$grid[1]->setColumnAttributes($column, array('style' => 'width: 48%'));
-			}
-			$grid[1]->setRowAttributes(array('style' => 'height: 36px'));
-		}
+		// set datagrid options
+		$this->dgEmailSettings = new BackendDataGridArray($source);
+		$this->dgEmailSettings->setColumnAttributes('to', array('class' => 'transform', 'data-column' => 'to'));
+		$this->dgEmailSettings->setColumnAttributes('from', array('class' => 'transform', 'data-column' => 'from'));
+		$this->dgEmailSettings->setColumnAttributes('reply', array('class' => 'transform', 'data-column' => 'reply'));
+		$this->dgEmailSettings->setColumnAttributes('language', array('style' => 'vertical-align: top; width: 30px;'));
+		$this->dgEmailSettings->setRowAttributes(array('data-language' => '[language]'));
 
 		// setup form
 		$this->frm = new BackendForm('settingsEmail');
-		$this->frm->addDropdown('language_dependency', array('0' => 'Language independent', '1' => 'Language dependent'),$this->langDependency);
-		$this->frm->addText('mailer_from_name', (isset($this->mailerFrom[$this->wLang]['name']))? $this->mailerFrom[$this->wLang]['name'] : '');
-		$this->frm->addText('mailer_from_email', (isset($this->mailerFrom[$this->wLang]['email'])) ? $this->mailerFrom[$this->wLang]['email'] : '');
-		$this->frm->addText('mailer_to_name', (isset($this->mailerTo[$this->wLang]['name'])) ? $this->mailerTo[$this->wLang]['name'] : '');
-		$this->frm->addText('mailer_to_email', (isset($this->mailerTo[$this->wLang]['email'])) ? $this->mailerTo[$this->wLang]['email'] : '');
-		$this->frm->addText('mailer_reply_to_name', (isset($this->mailerReplyTo[$this->wLang]['name'])) ? $this->mailerReplyTo[$this->wLang]['name'] : '');
-		$this->frm->addText('mailer_reply_to_email', (isset($this->mailerReplyTo[$this->wLang]['email'])) ? $this->mailerReplyTo[$this->wLang]['email'] : '');
-
 		if($this->isGod)
 		{
 			$mailerType = BackendModel::getModuleSetting('core', 'mailer_type', 'mail');
@@ -133,10 +111,8 @@ class BackendSettingsEmail extends BackendBaseActionIndex
 	{
 		parent::parse();
 
-		// parse datagrids
-		$this->tpl->assign('dgEmailFrom', $this->grids['mailer_from'][1]->getContent());
-		$this->tpl->assign('dgEmailTo', $this->grids['mailer_to'][1]->getContent());
-		$this->tpl->assign('dgReplyTo', $this->grids['mailer_reply_to'][1]->getContent());
+		// parse datagrid
+		$this->tpl->assign('dgEmailSettings', $this->dgEmailSettings->getContent());
 
 		// parse the form
 		$this->frm->parse($this->tpl);
@@ -150,13 +126,27 @@ class BackendSettingsEmail extends BackendBaseActionIndex
 		// is the form submitted?
 		if($this->frm->isSubmitted())
 		{
-			// validate required fields
-			$this->frm->getField('mailer_from_name')->isFilled(BL::err('FieldIsRequired'));
-			$this->frm->getField('mailer_from_email')->isEmail(BL::err('EmailIsInvalid'));
-			$this->frm->getField('mailer_to_name')->isFilled(BL::err('FieldIsRequired'));
-			$this->frm->getField('mailer_to_email')->isEmail(BL::err('EmailIsInvalid'));
-			$this->frm->getField('mailer_reply_to_name')->isFilled(BL::err('FieldIsRequired'));
-			$this->frm->getField('mailer_reply_to_email')->isEmail(BL::err('EmailIsInvalid'));
+			// collect email settings
+			foreach($this->languages as $language)
+			{
+				foreach(array('from', 'to', 'reply') as $col)
+				{
+					// make sure to change language from 'en' to 'english' f.e.
+					$name = ($language === 'default')
+						? SpoonFilter::getPostValue($language . '-' . $col . '-name', null, '')
+						: SpoonFilter::getPostValue(SpoonLocale::getLanguage($language) . '-' . $col . '-name', null, '');
+					$email = ($language === 'default')
+						? SpoonFilter::getPostValue($language . '-' . $col . '-email', null, '')
+						: SpoonFilter::getPostValue(SpoonLocale::getLanguage($language) . '-' . $col . '-email', null, '');
+
+					// if null, use defaults
+					if($name === null || $name === '') $name = $this->emailSettings['default'][$col]['name'];
+					if($email === null || $email === '') $email = $this->emailSettings['default'][$col]['email'];
+
+					$fields[$language][$col]['name'] = $name;
+					$fields[$language][$col]['email'] = $email;
+				}
+			}
 
 			if($this->isGod)
 			{
@@ -172,19 +162,8 @@ class BackendSettingsEmail extends BackendBaseActionIndex
 			// no errors ?
 			if($this->frm->isCorrect())
 			{
-				// store settings
-				$this->mailerFrom[$this->wLang]['name'] = $this->frm->getField('mailer_from_name')->getValue();
-				$this->mailerFrom[$this->wLang]['email'] = $this->frm->getField('mailer_from_email')->getValue();
-				$this->mailerTo[$this->wLang]['name'] = $this->frm->getField('mailer_to_name')->getValue();
-				$this->mailerTo[$this->wLang]['email'] = $this->frm->getField('mailer_to_email')->getValue();
-				$this->mailerReplyTo[$this->wLang]['name'] = $this->frm->getField('mailer_reply_to_name')->getValue();
-				$this->mailerReplyTo[$this->wLang]['email'] = $this->frm->getField('mailer_reply_to_email')->getValue();
-
-				// save settings
-				BackendModel::setModuleSetting('core', 'language_dependency', $this->frm->getField('language_dependency')->getValue());
-				BackendModel::setModuleSetting('core', 'mailer_from', $this->mailerFrom);
-				BackendModel::setModuleSetting('core', 'mailer_to', $this->mailerTo);
-				BackendModel::setModuleSetting('core', 'mailer_reply_to', $this->mailerReplyTo);
+				// save email settings
+				BackendModel::setModuleSetting('core', 'mailer_settings', $fields);
 
 				if($this->isGod)
 				{
@@ -201,6 +180,8 @@ class BackendSettingsEmail extends BackendBaseActionIndex
 				$this->tpl->assign('report', true);
 				$this->tpl->assign('reportMessage', BL::msg('Saved'));
 				$this->tpl->assign('isGod', $this->isGod);
+
+				$this->redirect(BackendModel::createURLForAction('email') . '&report=saved');
 			}
 		}
 	}

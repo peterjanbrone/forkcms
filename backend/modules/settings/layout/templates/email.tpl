@@ -27,58 +27,12 @@
 		</div>
 	{/option:isGod}
 		<div class="options">
-			<h4>{$lblLanguageDependency|ucfirst}</h4>
-			<p>{$msgHelpLanguageDependency}</p>
-			<p>
-				{$ddmLanguageDependency} {$ddmLanguageDependencyError}
-			</p>
-		</div>
-		<div class="options">
-			<h4>{$lblFrom|ucfirst}</h4>
-			<p>{$msgHelpEmailFrom}</p>
+			<h4>{$lblEmailSettings|ucfirst}</h4>
+			<p>{$msgHelpEmailSettings}</p>
 
 			<div class="dataGridHolder">
-				{$dgEmailFrom}
+				{$dgEmailSettings}
 			</div>
-			<p>
-				<label for="mailerFromName">{$lblName|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
-				{$txtMailerFromName} {$txtMailerFromNameError}
-			</p>
-			<p>
-				<label for="mailerFromEmail">{$lblEmail|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
-				{$txtMailerFromEmail} {$txtMailerFromEmailError}
-			</p>
-		</div>
-		<div class="options">
-			<h4>{$lblTo|ucfirst}</h4>
-			<p>{$msgHelpEmailTo}</p>
-
-			<div class="dataGridHolder">
-				{$dgEmailTo}
-			</div>
-			<p>
-				<label for="mailerToName">{$lblName|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
-				{$txtMailerToName} {$txtMailerToNameError}
-			</p>
-			<p>
-				<label for="mailerToEmail">{$lblEmail|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
-				{$txtMailerToEmail} {$txtMailerToEmailError}
-			</p>
-		</div>
-		<div class="options">
-			<h4>{$lblReplyTo|ucfirst}</h4>
-
-			<div class="dataGridHolder">
-				{$dgReplyTo}
-			</div>
-			<p>
-				<label for="mailerReplyToName">{$lblName|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
-				{$txtMailerReplyToName} {$txtMailerReplyToNameError}
-			</p>
-			<p>
-				<label for="mailerReplyToEmail">{$lblEmail|ucfirst}<abbr title="{$lblRequiredField}">*</abbr></label>
-				{$txtMailerReplyToEmail} {$txtMailerReplyToEmailError}
-			</p>
 		</div>
 	</div>
 
