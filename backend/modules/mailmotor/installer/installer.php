@@ -205,7 +205,9 @@ class MailmotorInstaller extends ModuleInstaller
 
 		// get from/replyTo core settings
 		$from = $this->getSetting('core', 'mailer_from');
+		$from = $from[BL::getWorkingLanguage()];
 		$replyTo = $this->getSetting('core', 'mailer_reply_to');
+		$replyTo = $replyTo[BL::getWorkingLanguage()];
 
 		// general settings
 		$this->setSetting('mailmotor', 'from_email', $from['email']);
