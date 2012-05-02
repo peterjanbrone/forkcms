@@ -44,6 +44,7 @@ jsBackend.settings =
 		if($('#languageDependency').val() == 1)
 		{
 			// prevent form from submitting (ajax)
+			$('form').unbind('submit');
 			$('form').submit(function(e){e.preventDefault();});
 
 			$('.dataGridHolder').show();
@@ -52,7 +53,7 @@ jsBackend.settings =
 		else
 		{
 			// undo e.preventDefault
-			$('form').submit(function(e){$(this).unbind('submit').submit()});
+			$('form').submit(function(e){$(this).unbind('submit').submit();});
 
 			$('.dataGridHolder').hide();
 			$('.options').has('.dataGridHolder').find('p').has('label').show();
