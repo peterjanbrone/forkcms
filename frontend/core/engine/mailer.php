@@ -41,12 +41,10 @@ class FrontendMailer
 		$template = (string) $template;
 
 		// set defaults
-		$to = FrontendModel::getModuleSetting('core', 'mailer_to');
-		$to = $to[FRONTEND_LANGUAGE];
-		$from = FrontendModel::getModuleSetting('core', 'mailer_from');
-		$from = $from[FRONTEND_LANGUAGE];
-		$replyTo = FrontendModel::getModuleSetting('core', 'mailer_reply_to');
-		$replyTo = $replyTo[FRONTEND_LANGUAGE];
+		$settings = FrontendModel::getModuleSetting('core', 'mailer_settings');
+		$to = $settings[FRONTEND_LANGUAGE]['to'];
+		$from = $settings[FRONTEND_LANGUAGE]['from'];
+		$replyTo = $settings[FRONTEND_LANGUAGE]['reply'];
 		$utm = array('utm_source' => 'mail', 'utm_medium' => 'email', 'utm_campaign' => SpoonFilter::urlise($subject));
 
 		// set recipient/sender headers

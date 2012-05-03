@@ -204,10 +204,9 @@ class MailmotorInstaller extends ModuleInstaller
 		$email = SpoonSession::exists('email') ? SpoonSession::get('email') : null;
 
 		// get from/replyTo core settings
-		$from = $this->getSetting('core', 'mailer_from');
-		$from = $from[BL::getWorkingLanguage()];
-		$replyTo = $this->getSetting('core', 'mailer_reply_to');
-		$replyTo = $replyTo[BL::getWorkingLanguage()];
+		$settings = $this->getSetting('core', 'mailer_settings');
+		$from = $settings[BL::getWorkingLanguage()]['from'];
+		$replyTo = $settings[BL::getWorkingLanguage()]['reply'];
 
 		// general settings
 		$this->setSetting('mailmotor', 'from_email', $from['email']);

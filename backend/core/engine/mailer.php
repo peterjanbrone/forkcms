@@ -43,14 +43,10 @@ class BackendMailer
 		$template = (string) $template;
 
 		// set defaults
-		$to = BackendModel::getModuleSetting('core', 'mailer_to');
-		$from = BackendModel::getModuleSetting('core', 'mailer_from');
-		$replyTo = BackendModel::getModuleSetting('core', 'mailer_reply_to');
-
-		// set language
-		$to = $to[BL::getWorkingLanguage()];
-		$from = $from[BL::getWorkingLanguage()];
-		$replyTo = $replyTo[BL::getWorkingLanguage()];
+		$settings = BackendModel::getModuleSetting('core', 'mailer_settings');
+		$to = $settings[BL::getWorkingLanguage()]['to'];
+		$from = $settings[BL::getWorkingLanguage()]['from'];
+		$replyTo = $settings[BL::getWorkingLanguage()]['reply'];
 
 		// set recipient/sender headers
 		$email['to_email'] = ($toEmail === null) ? (string) $to['email'] : $toEmail;

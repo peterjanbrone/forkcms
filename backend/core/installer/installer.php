@@ -915,9 +915,13 @@ class CoreInstaller extends ModuleInstaller
 		$this->setSetting('core', 'number_formats', array('comma_nothing' => '10000,25', 'dot_nothing' => '10000.25', 'dot_comma' => '10,000.25', 'comma_dot' => '10.000,25', 'dot_space' => '10000.25', 'comma_space' => '10 000,25'));
 
 		// e-mail settings
-		$this->setSetting('core', 'mailer_from', array(BL::getWorkingLanguage() => array('name' => 'Fork CMS', 'email' => $this->getVariable('spoon_debug_email'))));
-		$this->setSetting('core', 'mailer_to', array(BL::getWorkingLanguage() => array('name' => 'Fork CMS', 'email' => $this->getVariable('spoon_debug_email'))));
-		$this->setSetting('core', 'mailer_reply_to', array(BL::getWorkingLanguage() => array('name' => 'Fork CMS', 'email' => $this->getVariable('spoon_debug_email'))));
+		$default = array(
+			'to' => array('name' => 'Fork CMS', 'email' => $this->getVariable('spoon_debug_email')),
+			'from' => array('name' => 'Fork CMS', 'email' => $this->getVariable('spoon_debug_email')),
+			'reply' => array('name' => 'Fork CMS', 'email' => $this->getVariable('spoon_debug_email'))
+		);
+		$mailSettings = array('default' => $default, BL::getWorkingLanguage() => $default);
+		$this->setSetting('core', 'mailer_settings', $mailSettings);
 
 		// stmp settings
 		$this->setSetting('core', 'smtp_server', $this->getVariable('smtp_server'));
