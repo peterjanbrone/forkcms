@@ -86,7 +86,7 @@ class BackendAnalyticsModel
 	/**
 	 * Filters data so it's highchart-usable
 	 *
-	 * @param array data
+	 * @param array $data
 	 * @param int $startTimestamp The start timestamp of the data.
 	 * @param int $endTimestamp The end timestamp of the data.
 	 * @return array
@@ -94,24 +94,21 @@ class BackendAnalyticsModel
 	public static function convertForHighchart($data, $startTimestamp, $endTimestamp)
 	{
 		// make a container with the appropriate amount of days
-		$highchartData = array();
 		$days = round(($endTimestamp - $startTimestamp) / (60 * 60 * 24));
 
 		for($i = 0; $i < $days; $i++)
 		{
-			$highchartData[$i] = array();
-			$highchartData[$i]['timestamp'] = (int) $startTimestamp + ($i * 60 * 60 * 24);
-			$highchartData[$i]['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
-			$highchartData[$i]['pages_info'] = array();
+			$day['timestamp'] = (int) $startTimestamp + ($i * 60 * 60 * 24);
+			$day['pageviews'] = array(array('index' => 0, 'url' => 'none...'));
+			$day['pages_info'] = array();
+			$highchartData[] = $day;
 		}
 
 		// convert the data
 		$index = 0;
-		$convertedData = array();
 		$currentDay = $data[0]['timestamp'];
 		for($i = 0; $i < sizeof($data); $i)
 		{
-			// init the arrays
 			$convertedData[$index]['timestamp'] = $data[$i]['timestamp'];
 			$convertedData[$index]['pageviews'] = array();
 			$convertedData[$index]["pages_info"] = array();
@@ -121,36 +118,24 @@ class BackendAnalyticsModel
 
 			// collect all data for that day
 			$counter = 0;
-
 			while((int) $data[$i]['timestamp'] === (int) $currentDay)
 			{
 				$url = $data[$i]['pagePath'];
 
 				// too long to display? make it shorter
-				if(strlen($url) > 40)
-				{
-					$parts = explode('?', $url);
-					$url = $parts[0] . '?';
+				if(strlen($url) > 40) $url = substr((string) $url, 0, 40) . '...';
 
-					if(strlen($url) > 40) $url = substr((string) $url, 0, 39);
-
-					$url .= '...';
-				}
-
-				// store index and url
-				array_push($convertedData[$index]['pageviews'], array('index' => $i, 'url' => $url));
-
-				// store all other info
-				array_push($convertedData[$index]['pages_info'], array(
-						'full_url' => $data[$i]['pagePath'],
-						'unique_pageviews' => $data[$i]['uniquePageviews'],
-						'pageviews' => $data[$i]['pageviews'],
-						'browser' => $data[$i]['browser'],
-						'browser_version' => $data[$i]['browserVersion'],
-						'extension' => $data[$i]['customVarValue1'],
-						'is_logged_in' => $data[$i]['customVarValue2'],
-						'caller_is_action' => $data[$i]['customVarValue3']
-				));
+				$convertedData[$index]['pageviews'][] = array('index' => $i, 'url' => $url);
+				$convertedData[$index]['pages_info'][] = array(
+					'full_url' => $data[$i]['pagePath'],
+					'unique_pageviews' => $data[$i]['uniquePageviews'],
+					'pageviews' => $data[$i]['pageviews'],
+					'browser' => $data[$i]['browser'],
+					'browser_version' => $data[$i]['browserVersion'],
+					'extension' => $data[$i]['customVarValue1'],
+					'is_logged_in' => $data[$i]['customVarValue2'],
+					'caller_is_action' => $data[$i]['customVarValue3']
+				);
 
 				$i++;
 
@@ -159,7 +144,6 @@ class BackendAnalyticsModel
 			}
 
 			$currentDay = $data[$i]['timestamp'];
-
 			$index++;
 		}
 
