@@ -21,7 +21,7 @@ jsBackend.analytics =
 		$filterIsLoggedIn = $('#isLoggedIn');
 		$filterCallerIsAction = $('#callerIsAction');
 		$filterBrowser = $('#browser');
-		$filterBrowserVersion = $('#browserVersion');
+		$filterVersion = $('#version');
 
 		jsBackend.analytics.charts.init();
 		jsBackend.analytics.chartDoubleMetricPerDay.init();
@@ -402,7 +402,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 			$filterCallerIsAction.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterExtension.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterBrowser.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
-			$filterBrowserVersion.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
+			$filterVersion.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
 		}
 	},
 
@@ -417,7 +417,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 				callerIsAction: $filterCallerIsAction.is(':checked'),
 				extension: $filterExtension.val(),
 				browser: $filterBrowser.val(),
-				browserVersion: $filterBrowserVersion.val(),
+				version: $filterVersion.val(),
 				startTimestamp: $('#startTimestamp').html(),
 				endTimestamp: $('#endTimestamp').html(),
 				date: date,

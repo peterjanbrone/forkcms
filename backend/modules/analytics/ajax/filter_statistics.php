@@ -119,7 +119,7 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 		$callerIsAction = trim(SpoonFilter::getPostValue('callerIsAction', null, '', 'string'));
 		$extension = trim(SpoonFilter::getPostValue('extension', null, '', 'string'));
 		$browser = trim(SpoonFilter::getPostValue('browser', null, '', 'string'));
-		$browserVersion = trim(SpoonFilter::getPostValue('browserVersion', null, '', 'string'));
+		$version = trim(SpoonFilter::getPostValue('version', null, '', 'string'));
 		$isLoggedIn = trim(SpoonFilter::getPostValue('isLoggedIn', null, '', 'string'));
 
 		// dont filter if the extension is empty, this means the call originated from the dashboard
@@ -175,9 +175,9 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 				}
 
 				// browser version?
-				if($browserVersion !== '-')
+				if($version !== '-')
 				{
-					if($pageInfo['browser_version'] !== $browserVersion)
+					if($pageInfo['browser_version'] !== $version)
 					{
 						unset($dataItem['pages_info'][$i]);
 						unset($dataItem['pageviews'][$i]);

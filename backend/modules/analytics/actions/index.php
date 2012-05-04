@@ -288,7 +288,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']));
 		$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
 		$this->tpl->assign('filterBrowser', $filterBrowser);
-		$this->tpl->assign('filterBrowserVersion', $filterVersion);
+		$this->tpl->assign('filterVersion', $filterVersion);
 		$this->tpl->assign('filterExtension', $extensions);
 		$this->tpl->assign('chartPageNotFoundStatisticsStartDate', $this->startTimestamp);
 		$this->tpl->assign('chartPageNotFoundStatisticsEndDate', $this->endTimestamp);

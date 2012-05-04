@@ -174,14 +174,14 @@
 								</select>
 								{/option:filterBrowser}
 
-								{option:filterBrowserVersion}
+								{option:filterVersion}
 								<p>version:</p>
-								<select id="browserVersion">
-									{iteration:filterBrowserVersion}
-									<option>{$filterBrowserVersion.version}</option>
-									{/iteration:filterBrowserVersion}
+								<select id="version">
+									{iteration:filterVersion}
+									<option>{$filterVersion.version}</option>
+									{/iteration:filterVersion}
 								</select>
-								{/option:filterBrowserVersion}
+								{/option:filterVersion}
 								</span>
 							</div>
 
