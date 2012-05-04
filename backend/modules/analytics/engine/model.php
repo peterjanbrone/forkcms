@@ -117,7 +117,7 @@ class BackendAnalyticsModel
 			$convertedData[$index]["pages_info"] = array();
 
 			// skip if we're doing a no-data fix
-			if($currentDay === 0) break;
+			if($currentDay === -1) break;
 
 			// collect all data for that day
 			$counter = 0;

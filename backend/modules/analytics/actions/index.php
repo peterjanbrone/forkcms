@@ -229,7 +229,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		$statistics = BackendAnalyticsModel::getPageNotFoundStatistics($this->startTimestamp, $this->endTimestamp);
 
 		// no-data fix, this way we'll have an empty graphdata array instead of no graphdata at all
-		if($statistics === false || empty($statistics)) $statistics = array(array('timestamp' => 0));
+		if($statistics === false || empty($statistics)) $statistics = array(array('timestamp' => -1));
 
 		// make the data highchart usable
 		$statistics = BackendAnalyticsModel::convertForHighchart($statistics, $this->startTimestamp, $this->endTimestamp);
