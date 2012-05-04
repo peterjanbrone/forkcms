@@ -178,7 +178,7 @@
 								<p>version:</p>
 								<select id="browserVersion">
 									{iteration:filterBrowserVersion}
-									<option>{$filterBrowserVersion.versionId}</option>
+									<option>{$filterBrowserVersion.version}</option>
 									{/iteration:filterBrowserVersion}
 								</select>
 								{/option:filterBrowserVersion}

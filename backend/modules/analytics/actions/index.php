@@ -222,100 +222,73 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 	 */
 	private function parsePageNotFoundStatistics()
 	{
-		$metrics = array('pageviews');
-		$graphData = array();
-
-		// get the data
 		$statistics = BackendAnalyticsModel::getPageNotFoundStatistics($this->startTimestamp, $this->endTimestamp);
 
-		// no-data fix, this way we'll have an empty graphdata array instead of no graphdata at all
+		// make sure statistics is never false or empty, else the highchart won't be rendered
+		// assign a timestamp value of -1 so convertForHighchart knows what's going on
 		if($statistics === false || empty($statistics)) $statistics = array(array('timestamp' => -1));
 
 		// make the data highchart usable
 		$statistics = BackendAnalyticsModel::convertForHighchart($statistics, $this->startTimestamp, $this->endTimestamp);
 
-		// loop metrics
-		foreach($metrics as $i => $metric)
-		{
-			// build graph data array
-			$graphData[$i] = array();
-			$graphData[$i]['title'] = $metric;
-			$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
-			$graphData[$i]['i'] = $i + 1;
-			$graphData[$i]['data'] = array();
+		// init graphdata array
+		$graphData[] = array(
+			'title' => 'pageviews',
+			'label' => SpoonFilter::ucfirst(BL::lbl('pageviews')),
+			'i' => 1,
+			'data' => array()
+		);
 
-			// loop metrics per day
-			foreach($statistics as $j => $data)
-			{
-				// cast SimpleXMLElement to array
-				$data = (array) $data;
-
-				// build array
-				$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-				$graphData[$i]['data'][$j]['value'] = (string) count($data[$metric]);
-
-				// perform an extra check to determine if we counted the 'none...' row
-				if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
-			}
-		}
-
-		// get the maximum value
-		$maxYAxis = 2;
-		foreach($graphData as $metric)
-		{
-			foreach($metric['data'] as $data)
-			{
-				if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
-			}
-		}
-
-		// collect all browsers, versions and extensions
+		// loop all statistics and filter out wanted information
 		$browsers = array();
 		$extensions = array(array('name' => '-'));
-		foreach($statistics as $stat)
+		$minY = PHP_INT_MAX;
+		$maxY = 0;
+		foreach($statistics as $i => $stat)
 		{
+			$pageviews = ($stat['pageviews'][0]['url'] !== 'none...')
+				? count($stat['pageviews'])
+				: 0;
+
+			$graphData[0]['data'][] = array(
+				'date' => (int) $stat['timestamp'],
+				'value' => (string) $pageviews
+			);
+
+			// get max Y-axis
+			$minY = min($minY, count($stat['pageviews']));
+			$maxY = max($maxY, count($stat['pageviews']));
+
+			// get browser data
 			foreach($stat['pages_info'] as $page)
 			{
-				// get all browsers
-				if(!in_array($page['browser'], $browsers))
-				{
-					$browsers[$page['browser']] = array('name' => $page['browser'], 'versions' => array());
-				}
+				$browser = $page['browser'];
+				if(!in_array($browser, $browsers)) $browsers[$browser] = array('name' => $browser, 'versions' => array());
 
-				// get all versions of each browser
-				if(!in_array($page['browser_version'], $browsers[$page['browser']]['versions']))
-				{
-					array_push($browsers[$page['browser']]['versions'], $page['browser_version']);
-				}
+				$version = $page['browser_version'];
+				if(!in_array($version, $browsers[$browser]['versions'])) $browsers[$browser]['versions'][] = $version;
 
-				// get all extensions
-				if(!in_array($page['extension'], $extensions))
-				{
-					$extensions[$page['extension']] = array('name' => $page['extension']);
-				}
+				$extension = $page['extension'];
+				if(!in_array($extension, $extensions)) $extensions[$extension] = array('name' => $extension);
 			}
 		}
 
-		// construct 2 arrays suited for iteration
-		$filterBrowser = array(array('name' => '-'));
-		$filterBrowserVersion = array(array('versionId' => '-'));
+		// make browsers and versions suited for a dropdown
+		$filterBrowser[] = array('name' => '-');
+		$filterVersion[] = array('version' => '-');
 		foreach($browsers as $browser)
 		{
-			array_push($filterBrowser, array('name' => $browser['name']));
-
-			foreach($browser['versions'] as $version)
-			{
-				array_push($filterBrowserVersion, array('versionId' => $version));
-			}
+			$filterBrowser[] = array('name' => $browser['name']);
+			foreach($browser['versions'] as $version) $filterVersion[] = array('version' => $version);
 		}
 
-		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxYAxis);
-		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
+		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxY);
+		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxY == 2 ? '1' : ''));
 		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
 		$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']));
 		$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
 		$this->tpl->assign('filterBrowser', $filterBrowser);
-		$this->tpl->assign('filterBrowserVersion', $filterBrowserVersion);
+		$this->tpl->assign('filterBrowserVersion', $filterVersion);
 		$this->tpl->assign('filterExtension', $extensions);
 		$this->tpl->assign('chartPageNotFoundStatisticsStartDate', $this->startTimestamp);
 		$this->tpl->assign('chartPageNotFoundStatisticsEndDate', $this->endTimestamp);
