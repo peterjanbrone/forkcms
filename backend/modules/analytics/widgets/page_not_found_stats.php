@@ -47,7 +47,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 	private function parse()
 	{
 		$maxYAxis = 2;
-		$metrics = array('pageviews');
+		$metric = 'pageviews';
 		$graphData = array();
 		$dashboardData = array();
 
@@ -103,42 +103,34 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 			// make the data highchart usable
 			$dashboardData = BackendAnalyticsModel::convertForHighchart($dashboardData, strtotime('-1 week -1 days', mktime(0, 0, 0)), mktime(0, 0, 0));
 
-			// loop metrics
-			foreach($metrics as $i => $metric)
+			// init graphdata array
+			$graphData[] = array(
+					'title' => $metric,
+					'label' => SpoonFilter::ucfirst(BL::lbl($metric)),
+					'i' => 1,
+					'data' => array()
+			);
+
+			$minY = PHP_INT_MAX;
+			$maxY = 0;
+			foreach($dashboardData as $i => $data)
 			{
-				// build graph data array
-				$graphData[$i] = array();
-				$graphData[$i]['title'] = $metric;
-				$graphData[$i]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase($metric)));
-				$graphData[$i]['i'] = $i + 1;
-				$graphData[$i]['data'] = array();
+				$pageviews = ($data[$metric][0]['url'] !== 'none...')
+					? count($data[$metric])
+					: 0;
 
-				// loop metrics per day
-				foreach($dashboardData as $j => $data)
-				{
-					// cast SimpleXMLElement to array
-					$data = (array) $data;
-
-					// build array
-					$graphData[$i]['data'][$j]['date'] = (int) $data['timestamp'];
-					$graphData[$i]['data'][$j]['value'] = (int) count($data[$metric]);
-
-					// perform an extra check to determine if we counted the 'none...' row
-					if($data[$metric][0]['url'] === 'none...') $graphData[$i]['data'][$j]['value'] = 0;
-				}
+				$graphData[0]['data'][] = array(
+					'date' => (int) $data['timestamp'],
+					'value' => (string) $pageviews
+				);
 			}
 
-			// get the maximum Y value
-			foreach($graphData as $metric)
-			{
-				foreach($metric['data'] as $data)
-				{
-					if((int) $data['value'] > $maxYAxis) $maxYAxis = (int) $data['value'];
-				}
-			}
+			// get max Y-axis
+			$minY = min($minY, count($data[$metric]));
+			$maxY = max($maxY, count($data[$metric]));
 
-			$this->tpl->assign('analyticsPageNotFoundStatisticsMaxYAxis', $maxYAxis);
-			$this->tpl->assign('analyticsPageNotFoundStatisticsTickInterval', ($maxYAxis == 2 ? '1' : ''));
+			$this->tpl->assign('analyticsPageNotFoundStatisticsMaxYAxis', $maxY);
+			$this->tpl->assign('analyticsPageNotFoundStatisticsTickInterval', ($maxY == 2 ? '1' : ''));
 			$this->tpl->assign('analyticsPageNotFoundStatisticsGraphData', $graphData);
 			$this->tpl->assign('analyticsPageNotFoundStatisticsDate', date("D j M", (int) $dashboardData[0]['timestamp']));
 			$this->tpl->assign('pageNotFoundStatisticsDataGrid', $dashboardData[0]);
