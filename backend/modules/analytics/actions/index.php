@@ -241,6 +241,8 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 
 		// loop all statistics and filter out wanted information
 		$maxY = 0;
+		$browsers = array();
+		$extensions = array();
 		foreach($statistics as $i => $stat)
 		{
 			$pageviews = ($stat['pageviews'][0]['url'] !== 'none...')
@@ -258,33 +260,26 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 			foreach($stat['pages_info'] as $page)
 			{
 				$browser = $page['browser'];
-				if(!isset($browsers) || !in_array($browser, $browsers))
-				{
-					$browsers[$browser] = array('name' => $browser, 'versions' => array());
-				}
+				if(!in_array($browser, $browsers)) $browsers[$browser] = array('name' => $browser, 'versions' => array());
 
 				$version = $page['browser_version'];
-				if(!in_array($version, $browsers[$browser]['versions']))
-				{
-					$browsers[$browser]['versions'][] = $browser . '||' . $version;
-				}
+				if(!in_array($version, $browsers[$browser]['versions'])) $browsers[$browser]['versions'][] = $browser . '||' . $version;
 
 				$extension = $page['extension'];
-				if(!isset($extensions) || !in_array($extension, $extensions))
-				{
-					$extensions[$extension] = array('name' => $extension);
-				}
+				if(!in_array($extension, $extensions)) $extensions[$extension] = array('name' => $extension);
 			}
 		}
 
 		// make browsers and versions suited for a dropdown
+		$filterBrowser = array();
+		$filterVersion = array();
 		foreach($browsers as $browser)
 		{
 			$filterBrowser[] = array('name' => $browser['name']);
 			foreach($browser['versions'] as $version) $filterVersion[] = array('version' => $version);
 		}
-		array_unshift($filterBrowser, array('name' => '-'));
 		array_unshift($extensions, array('name' => '-'));
+		array_unshift($filterBrowser, array('name' => '-'));
 		array_unshift($filterVersion, array('version' => '-'));
 
 		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxY);
