@@ -156,32 +156,32 @@
 								<p>{$lblCallerIsAction}</p>
 								<input type=checkbox name="caller_is_action" id="callerIsAction"/>
 
-								{option:filterExtension}
+								{option:ddmExtensions}
 								<p>{$lblExtension}</p>
 								<select id="extension">
-									{iteration:filterExtension}
-									<option>{$filterExtension.name}</option>
-									{/iteration:filterExtension}
+									{iteration:ddmExtensions}
+									<option>{$ddmExtensions.name}</option>
+									{/iteration:ddmExtensions}
 								</select>
-								{/option:filterExtension}
+								{/option:ddmExtensions}
 
-								{option:filterBrowser}
+								{option:ddmBrowsers}
 								<p>{$lblBrowser}</p>
 								<select id="browser">
-									{iteration:filterBrowser}
-									<option>{$filterBrowser.name}</option>
-									{/iteration:filterBrowser}
+									{iteration:ddmBrowsers}
+									<option>{$ddmBrowsers.name}</option>
+									{/iteration:ddmBrowsers}
 								</select>
-								{/option:filterBrowser}
+								{/option:ddmBrowsers}
 
-								{option:filterVersion}
+								{option:ddmVersions}
 								<p>{$lblVersion}</p>
 								<select id="version">
-									{iteration:filterVersion}
-									<option>{$filterVersion.version}</option>
-									{/iteration:filterVersion}
+									{iteration:ddmVersions}
+									<option>{$ddmVersions.version}</option>
+									{/iteration:ddmVersions}
 								</select>
-								{/option:filterVersion}
+								{/option:ddmVersions}
 								</span>
 							</div>
 

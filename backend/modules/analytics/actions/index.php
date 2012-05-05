@@ -242,7 +242,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		// loop all statistics and filter out wanted information
 		$maxY = 0;
 		$browsers = array();
-		$extensions = array();
+		$ddmExtensions = array();
 		foreach($statistics as $i => $stat)
 		{
 			$pageviews = ($stat['pageviews'][0]['url'] !== 'none...')
@@ -266,30 +266,30 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 				if(!in_array($version, $browsers[$browser]['versions'])) $browsers[$browser]['versions'][] = $browser . '||' . $version;
 
 				$extension = $page['extension'];
-				if(!in_array($extension, $extensions)) $extensions[$extension] = array('name' => $extension);
+				if(!in_array($extension, $ddmExtensions)) $ddmExtensions[$extension] = array('name' => $extension);
 			}
 		}
 
 		// make browsers and versions suited for a dropdown
-		$filterBrowser = array();
-		$filterVersion = array();
+		$ddmBrowsers = array();
+		$ddmVersions = array();
 		foreach($browsers as $browser)
 		{
-			$filterBrowser[] = array('name' => $browser['name']);
-			foreach($browser['versions'] as $version) $filterVersion[] = array('version' => $version);
+			$ddmBrowsers[] = array('name' => $browser['name']);
+			foreach($browser['versions'] as $version) $ddmVersions[] = array('version' => $version);
 		}
-		array_unshift($extensions, array('name' => '-'));
-		array_unshift($filterBrowser, array('name' => '-'));
-		array_unshift($filterVersion, array('version' => '-'));
+		array_unshift($ddmExtensions, array('name' => '-'));
+		array_unshift($ddmBrowsers, array('name' => '-'));
+		array_unshift($ddmVersions, array('version' => '-'));
 
 		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxY);
 		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxY == 2 ? '1' : ''));
 		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
 		$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']));
 		$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
-		$this->tpl->assign('filterBrowser', $filterBrowser);
-		$this->tpl->assign('filterVersion', $filterVersion);
-		$this->tpl->assign('filterExtension', $extensions);
+		$this->tpl->assign('ddmBrowsers', $ddmBrowsers);
+		$this->tpl->assign('ddmVersions', $ddmVersions);
+		$this->tpl->assign('ddmExtensions', $ddmExtensions);
 		$this->tpl->assign('chartPageNotFoundStatisticsStartDate', $this->startTimestamp);
 		$this->tpl->assign('chartPageNotFoundStatisticsEndDate', $this->endTimestamp);
 	}
