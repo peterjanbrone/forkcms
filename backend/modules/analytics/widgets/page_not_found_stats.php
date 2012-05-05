@@ -130,7 +130,7 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 			$this->tpl->assign('analyticsPageNotFoundStatisticsMaxYAxis', $maxY);
 			$this->tpl->assign('analyticsPageNotFoundStatisticsTickInterval', ($maxY == 2 ? '1' : ''));
 			$this->tpl->assign('analyticsPageNotFoundStatisticsGraphData', $graphData);
-			$this->tpl->assign('analyticsPageNotFoundStatisticsDate', date("D j M", (int) $dashboardData[0]['timestamp']));
+			$this->tpl->assign('analyticsPageNotFoundStatisticsDate', SpoonDate::getDate("D j M", (int) $dashboardData[0]['timestamp'], BL::getWorkingLanguage()));
 			$this->tpl->assign('pageNotFoundStatisticsDataGrid', $dashboardData[0]);
 		}
 

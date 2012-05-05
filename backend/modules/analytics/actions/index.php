@@ -285,7 +285,7 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxY);
 		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxY == 2 ? '1' : ''));
 		$this->tpl->assign('pageNotFoundStatisticsGraphData', $graphData);
-		$this->tpl->assign('pageNotFoundStatisticsDate', date("D j M", (int) $statistics[0]['timestamp']));
+		$this->tpl->assign('pageNotFoundStatisticsDate', SpoonDate::getDate("D j M", (int) $statistics[0]['timestamp'], BL::getWorkingLanguage()));
 		$this->tpl->assign('pageNotFoundStatisticsDataGrid', $statistics[0]);
 		$this->tpl->assign('ddmBrowsers', $ddmBrowsers);
 		$this->tpl->assign('ddmVersions', $ddmVersions);
