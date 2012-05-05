@@ -94,10 +94,10 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 			$dashboardData = BackendAnalyticsHelper::getPageNotFoundStatistics(strtotime('-1 week -1 days', mktime(0, 0, 0)), mktime(0, 0, 0));
 		}
 
-		// there are some metrics
+		// xml found
 		if($dashboardData !== false)
 		{
-			// if completely empty add an array with timestamp 0, convertForHighchart will pick this up and act accordingly
+			// if completely empty add an array with timestamp -1, convertForHighchart will pick this up and act accordingly
 			if(empty($dashboardData)) $dashboardData = array(array('timestamp' => -1));
 
 			// make the data highchart usable
