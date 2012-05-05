@@ -148,16 +148,16 @@
 							<div id="chartPageNotFoundStatistics">&nbsp;</div>
 
 							<div id="pageNotFoundStatisticsFilter">
-								<h4>Filter:</h4>
+								<h4>{$lblFilter}</h4>
 								<span>
-								<p>user logged in:</p>
+								<p>{$lblUserLoggedIn}</p>
 								<input type=checkbox name="user_logged_in" id="isLoggedIn"/>
 
-								<p>caller is action:</p>
+								<p>{$lblCallerIsAction}</p>
 								<input type=checkbox name="caller_is_action" id="callerIsAction"/>
 
 								{option:filterExtension}
-								<p>extension:</p>
+								<p>{$lblExtension}</p>
 								<select id="extension">
 									{iteration:filterExtension}
 									<option>{$filterExtension.name}</option>
@@ -166,7 +166,7 @@
 								{/option:filterExtension}
 
 								{option:filterBrowser}
-								<p>browser:</p>
+								<p>{$lblBrowser}</p>
 								<select id="browser">
 									{iteration:filterBrowser}
 									<option>{$filterBrowser.name}</option>
@@ -175,7 +175,7 @@
 								{/option:filterBrowser}
 
 								{option:filterVersion}
-								<p>version:</p>
+								<p>{$lblVersion}</p>
 								<select id="version">
 									{iteration:filterVersion}
 									<option>{$filterVersion.version}</option>
