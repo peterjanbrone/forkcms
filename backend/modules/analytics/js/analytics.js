@@ -476,11 +476,11 @@ jsBackend.analytics.pageNotFoundStatistics =
 				);
 
 				// update maxYAxis
-				if(json.data.data[0].data[i].value  > maxYAxis) maxYAxis = json.data.data[0].data[i].value;
+				// if(json.data.data[0].data[i].value  > maxYAxis) maxYAxis = json.data.data[0].data[i].value;
 			}
 
 			// set max Y and tick interval
-			$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis.toString());
+			//$('#chartPageNotFoundStatisticsMaxYAxis').html(maxYAxis.toString());
 
 			// init to re-bind all event listeners
 			jsBackend.analytics.chartPageNotFoundStatistics.init();
