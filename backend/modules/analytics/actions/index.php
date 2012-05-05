@@ -240,8 +240,6 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		);
 
 		// loop all statistics and filter out wanted information
-		$browsers = array();
-		$extensions = array(array('name' => '-'));
 		$minY = PHP_INT_MAX;
 		$maxY = 0;
 		foreach($statistics as $i => $stat)
@@ -259,28 +257,38 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 			$minY = min($minY, count($stat['pageviews']));
 			$maxY = max($maxY, count($stat['pageviews']));
 
-			// get browser data
+			// collect filter data
 			foreach($stat['pages_info'] as $page)
 			{
 				$browser = $page['browser'];
-				if(!in_array($browser, $browsers)) $browsers[$browser] = array('name' => $browser, 'versions' => array());
+				if(!isset($browsers) || !in_array($browser, $browsers))
+				{
+					$browsers[$browser] = array('name' => $browser, 'versions' => array());
+				}
 
 				$version = $page['browser_version'];
-				if(!in_array($version, $browsers[$browser]['versions'])) $browsers[$browser]['versions'][] = $version;
+				if(!in_array($version, $browsers[$browser]['versions']))
+				{
+					$browsers[$browser]['versions'][] = $browser . '||' . $version;
+				}
 
 				$extension = $page['extension'];
-				if(!in_array($extension, $extensions)) $extensions[$extension] = array('name' => $extension);
+				if(!isset($extensions) || !in_array($extension, $extensions))
+				{
+					$extensions[$extension] = array('name' => $extension);
+				}
 			}
 		}
 
 		// make browsers and versions suited for a dropdown
-		$filterBrowser[] = array('name' => '-');
-		$filterVersion[] = array('version' => '-');
 		foreach($browsers as $browser)
 		{
 			$filterBrowser[] = array('name' => $browser['name']);
 			foreach($browser['versions'] as $version) $filterVersion[] = array('version' => $version);
 		}
+		array_unshift($filterBrowser, array('name' => '-'));
+		array_unshift($extensions, array('name' => '-'));
+		array_unshift($filterVersion, array('version' => '-'));
 
 		$this->tpl->assign('chartPageNotFoundStatisticsMaxYAxis', $maxY);
 		$this->tpl->assign('chartPageNotFoundStatisticsTickInterval', ($maxY == 2 ? '1' : ''));

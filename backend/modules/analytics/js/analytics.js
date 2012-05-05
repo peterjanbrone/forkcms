@@ -402,7 +402,15 @@ jsBackend.analytics.pageNotFoundStatistics =
 			$filterCallerIsAction.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterExtension.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterBrowser.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
+			$filterBrowser.on('change', jsBackend.analytics.pageNotFoundStatistics.disableVersionOptions);
 			$filterVersion.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
+
+			// Chrome||18.0.1025.162 => data-value = Chrome, innerHTML = 18.0.1025.162
+			$.each($filterVersion.find('option'), function(){
+				if(this.innerHTML === '-') return true;
+				$(this).attr('data-value', this.innerHTML.split('||')[0]);
+				this.innerHTML = this.innerHTML.split('||')[1];
+			});
 		}
 	},
 
@@ -432,6 +440,16 @@ jsBackend.analytics.pageNotFoundStatistics =
 				}
 				else callback(json);
 			}
+		});
+	},
+
+	disableVersionOptions: function()
+	{
+		$.each($filterVersion.find('option'), function(){
+			if(this.innerHTML === '-') return true;
+			this.disabled = ($filterBrowser.val() === '-' || $(this).attr('data-value') === $filterBrowser.val())
+				? false
+				: true;
 		});
 	},
 
