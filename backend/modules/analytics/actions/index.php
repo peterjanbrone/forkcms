@@ -240,7 +240,6 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 		);
 
 		// loop all statistics and filter out wanted information
-		$minY = PHP_INT_MAX;
 		$maxY = 0;
 		foreach($statistics as $i => $stat)
 		{
@@ -253,8 +252,6 @@ class BackendAnalyticsIndex extends BackendAnalyticsBase
 				'value' => (string) $pageviews
 			);
 
-			// get max Y-axis
-			$minY = min($minY, count($stat['pageviews']));
 			$maxY = max($maxY, count($stat['pageviews']));
 
 			// collect filter data

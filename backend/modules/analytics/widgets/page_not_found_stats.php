@@ -111,7 +111,6 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 					'data' => array()
 			);
 
-			$minY = PHP_INT_MAX;
 			$maxY = 0;
 			foreach($dashboardData as $i => $data)
 			{
@@ -123,11 +122,10 @@ class BackendAnalyticsWidgetPageNotFoundStats extends BackendBaseWidget
 					'date' => (int) $data['timestamp'],
 					'value' => (string) $pageviews
 				);
-			}
 
-			// get max Y-axis
-			$minY = min($minY, count($data[$metric]));
-			$maxY = max($maxY, count($data[$metric]));
+				// get max Y-axis
+				$maxY = max($maxY, count($data[$metric]));
+			}
 
 			$this->tpl->assign('analyticsPageNotFoundStatisticsMaxYAxis', $maxY);
 			$this->tpl->assign('analyticsPageNotFoundStatisticsTickInterval', ($maxY == 2 ? '1' : ''));
