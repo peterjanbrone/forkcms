@@ -20,83 +20,55 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 	public function execute()
 	{
 		parent::execute();
-
 		$result = array();
 
-		// get timestamps
+		// get variables
+		$date = trim(SpoonFilter::getPostValue('date', null, '', 'string'));
+		$index = trim(SpoonFilter::getPostValue('index', null, '', 'string'));
 		$startTimestamp = trim(SpoonFilter::getPostValue('startTimestamp', null, '', 'int'));
 		$endTimestamp = trim(SpoonFilter::getPostValue('endTimestamp', null, '', 'int'));
 
-		// fetch the data
-		$data = BackendAnalyticsModel::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
+		// fetch statistics, make it highchart usable and filter
+		$stats = BackendAnalyticsModel::getPageNotFoundStatistics($startTimestamp, $endTimestamp);
+		$stats = BackendAnalyticsModel::convertForHighchart($stats, $startTimestamp, $endTimestamp);
+		$stats = $this->filter($stats);
 
-		// make it highchart usable & filter
-		$data = BackendAnalyticsModel::convertForHighchart($data, $startTimestamp, $endTimestamp);
-		$data = $this->filter($data);
-
-		// get parameters
-		$date = trim(SpoonFilter::getPostValue('date', null, '', 'string'));
-		$index = trim(SpoonFilter::getPostValue('index', null, '', 'string'));
-
-		// if no date was given we want graph data
+		// no date -> return graphdata
 		if($date === '')
 		{
-			// build graph data array
+			// prepare result array
 			$result[0] = array();
 			$result[0]['title'] = 'pageviews';
 			$result[0]['label'] = SpoonFilter::ucfirst(BL::lbl(SpoonFilter::toCamelCase('pageviews')));
 			$result[0]['i'] = 1;
 			$result[0]['data'] = array();
 
-			// loop metrics per day
-			foreach($data as $i => $data)
+			foreach($stats as $i => $stat)
 			{
-				// cast SimpleXMLElement to array
-				$data = (array) $data;
+				$result[0]['data'][$i]['date'] = (int) $stat['timestamp'];
+				$result[0]['data'][$i]['value'] = (int) sizeof($stat['pageviews']);
 
-				// build array
-				$result[0]['data'][$i]['date'] = (int) $data['timestamp'];
-				$result[0]['data'][$i]['value'] = (int) sizeof($data['pageviews']);
-
-				// perform an extra check to determine if we counted the 'none...' row
-				foreach($data['pageviews'] as $pageview)
-				{
-					if($pageview['url'] === 'none...')
-					{
-						$result[0]['data'][$i]['value'] = 0;
-					}
-				}
+				// collect all urls, if 'none...' is amongst them, set #pageviews to 0
+				$urls = array_map(function($page){ return $page['url']; }, $stat['pageviews']);
+				if(in_array('none...', $urls)) $result[0]['data'][$i]['value'] = 0;
 			}
 		}
 
-		// if we have a date we want datagrid data
+		// we have a date -> return datagrid data
 		else
 		{
-			$timestamp = strtotime($date); // add 13h to match google's dates
-
-			foreach($data as $dataItem)
+			foreach($stats as $stat)
 			{
-				if((int) $dataItem['timestamp'] === (int) $timestamp)
+				if((int) $stat['timestamp'] === (int) strtotime($date))
 				{
-					// if there's an index we need datagrid details
-					if($index !== '')
-					{
-						$result = $dataItem['pages_info'][$index];
-					}
-
-					// if not we only need url's
-					else
-					{
-						foreach($dataItem['pageviews'] as $page)
-						{
-							array_push($result, $page['url']);
-						}
-					}
+					// index ? details : urls
+					$result = ($index !== '')
+						? $stat['pages_info'][$index]
+						: array_map(function($page){ return $page['url']; }, $stat['pageviews']);
 				}
 			}
 		}
 
-		// return status
 		$this->output(
 			self::OK,
 			array(
@@ -127,62 +99,46 @@ class BackendAnalyticsAjaxFilterStatistics extends BackendBaseAJAXAction
 
 		foreach($data as &$dataItem)
 		{
-			// filter
 			foreach($dataItem['pages_info'] as $i => $pageInfo)
 			{
 				// user logged in?
-				if($isLoggedIn !== 'false')
+				if($isLoggedIn !== 'false' && $pageInfo['is_logged_in'] !== 'yes')
 				{
-					if($pageInfo['is_logged_in'] !== 'yes')
-					{
-						unset($dataItem['pages_info'][$i]);
-						unset($dataItem['pageviews'][$i]);
-						continue;
-					}
+					unset($dataItem['pages_info'][$i]);
+					unset($dataItem['pageviews'][$i]);
+					continue;
 				}
 
 				// caller is action?
-				if($callerIsAction !== 'false')
+				if($callerIsAction !== 'false' && $pageInfo['caller_is_action'] !== 'yes')
 				{
-					if($pageInfo['caller_is_action'] !== 'yes')
-					{
-						unset($dataItem['pages_info'][$i]);
-						unset($dataItem['pageviews'][$i]);
-						continue;
-					}
+					unset($dataItem['pages_info'][$i]);
+					unset($dataItem['pageviews'][$i]);
+					continue;
 				}
 
 				// extension?
-				if($extension !== '-')
+				if($extension !== '-' && $pageInfo['extension'] !== $extension)
 				{
-					if($pageInfo['extension'] !== $extension)
-					{
-						unset($dataItem['pages_info'][$i]);
-						unset($dataItem['pageviews'][$i]);
-						continue;
-					}
+					unset($dataItem['pages_info'][$i]);
+					unset($dataItem['pageviews'][$i]);
+					continue;
 				}
 
 				// browser?
-				if($browser !== '-')
+				if($browser !== '-' && $pageInfo['browser'] !== $browser)
 				{
-					if($pageInfo['browser'] !== $browser)
-					{
-						unset($dataItem['pages_info'][$i]);
-						unset($dataItem['pageviews'][$i]);
-						continue;
-					}
+					unset($dataItem['pages_info'][$i]);
+					unset($dataItem['pageviews'][$i]);
+					continue;
 				}
 
 				// browser version?
-				if($version !== '-')
+				if($version !== '-' && $pageInfo['browser_version'] !== $version)
 				{
-					if($pageInfo['browser_version'] !== $version)
-					{
-						unset($dataItem['pages_info'][$i]);
-						unset($dataItem['pageviews'][$i]);
-						continue;
-					}
+					unset($dataItem['pages_info'][$i]);
+					unset($dataItem['pageviews'][$i]);
+					continue;
 				}
 			}
 
