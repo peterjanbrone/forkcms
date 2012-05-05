@@ -345,11 +345,11 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 
 	create: function()
 	{
-		var xAxisItems = $('#dataChartPageNotFoundStatistics ul.series li.serie:first-child ul.data li');
-		var xAxisValues = [];
-		var xAxisCategories = [];
-		var counter = 0;
-		var interval = Math.ceil(xAxisItems.length / 10);
+		var xAxisItems = $('#dataChartPageNotFoundStatistics ul.series li.serie:first-child ul.data li'),
+			xAxisValues = [],
+			xAxisCategories = [],
+			counter = 0,
+			interval = Math.ceil(xAxisItems.length / 10);
 
 		xAxisItems.each(function()
 		{
@@ -360,9 +360,9 @@ jsBackend.analytics.chartPageNotFoundStatistics =
 			counter++;
 		});
 
-		var metric1Name = $('#dataChartPageNotFoundStatistics ul.series li#metric1serie span.name').html();
-		var metric1Values = $('#dataChartPageNotFoundStatistics ul.series li#metric1serie span.value');
-		var metric1Data = [];
+		var metric1Name = $('#dataChartPageNotFoundStatistics ul.series li#metric1serie span.name').html(),
+			metric1Values = $('#dataChartPageNotFoundStatistics ul.series li#metric1serie span.value'),
+			metric1Data = [];
 
 		metric1Values.each(function() { metric1Data.push(parseInt($(this).html())); });
 
@@ -396,8 +396,8 @@ jsBackend.analytics.pageNotFoundStatistics =
 {
 	init: function()
 	{
-		if($filterExtension.length > 0) {
-			// add event listeners
+		if($filterExtension.length > 0)
+		{
 			$filterIsLoggedIn.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterCallerIsAction.on('click', jsBackend.analytics.pageNotFoundStatistics.filter);
 			$filterExtension.on('change', jsBackend.analytics.pageNotFoundStatistics.filter);
@@ -510,7 +510,7 @@ jsBackend.analytics.pageNotFoundStatistics =
 
 		// move the spinner !
 		var ajaxSpinner = $('#ajaxSpinner');
-		var style = ajaxSpinner.attr('style');
+		var style = ajaxSpinner.attr('style'); // save styles
 		ajaxSpinner.remove();
 		ajaxSpinner.insertAfter('#pageNotFoundStatisticsDate');
 		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
@@ -542,43 +542,33 @@ jsBackend.analytics.pageNotFoundStatistics =
 			$("#pageNotFoundIndex td").not(":contains('none...')").on('click', function(e){jsBackend.analytics.pageNotFoundStatistics.toggleDetails(e);});
 
 			// move the spinner back to it's place
-			ajaxSpinner.attr('style', style);
+			ajaxSpinner.attr('style', style); // reset styles
 			ajaxSpinner.insertAfter('#messaging');
 		});
 	},
 
 	toggleDetails: function(e)
 	{
-		// get the row index
-		var rowIndex = e.currentTarget.attributes[0].nodeValue;
-
 		// get the row
+		var rowIndex = e.currentTarget.attributes[0].nodeValue;
 		var row = $('#pageNotFoundIndex tr:eq(' + rowIndex + ')');
 
-		// got details already?
+		// row contains details? toggle & return early
 		if(row.next().hasClass('detailsPane'))
 		{
-			// are they hidden -> show
-			(row.next().css('display') === 'none')
-				? row.next().slideDown()
-				: row.next().slideUp('fast');
-
-			// we're done here
+			row.next().slideToggle();
 			return;
 		}
 
 		// move the spinner !
 		var ajaxSpinner = $('#ajaxSpinner');
 		var style = ajaxSpinner.attr('style');
-		ajaxSpinner.remove();
-		ajaxSpinner.insertAfter('#pageNotFoundStatisticsDate');
-		ajaxSpinner.attr('style', 'position:relative; left: 8px;');
+		ajaxSpinner.remove().insertAfter('#pageNotFoundStatisticsDate').attr('style', 'position:relative; left: 8px;');
 
 		var date = $('#pageNotFoundStatisticsDate').text();
 
 		// fetch the data
 		jsBackend.analytics.pageNotFoundStatistics.call(date, rowIndex, function(json){
-			// build the html
 			var html = '';
 			html += '<div class="detailsPane">';
 			html += '<h3>Page info:</h3>';
